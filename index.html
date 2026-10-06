@@ -1,1 +1,3328 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0f">
+<title>KRL — привычки</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+    :root {
+        --bg-primary: #0a0a0f;
+        --bg-secondary: #111118;
+        --bg-card: #0d0d16;
+        --bg-input: #161622;
+        --text-primary: #ffffff;
+        --text-secondary: #9a9ab8;
+        --text-muted: #555577;
+        --border-color: #222244;
+        --border-light: #1a1a2e;
+        --neon-primary: #33D6FF;
+        --neon-green: #00ffaa;
+        --neon-red: #ff3377;
+        --neon-yellow: #ffdd00;
+        --neon-purple: #aa66ff;
+        --neon-orange: #ff8844;
+        --neon-blue: #4488ff;
+        --radius: 16px;
+        --radius-sm: 12px;
+        --font-mono: 'SF Mono', 'Courier New', monospace;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #050508;
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
+    /* ============ TELEGRAM HEADER ============ */
+    .tg-header {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background: rgba(10, 10, 15, 0.92);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(51, 214, 255, 0.08);
+        flex-shrink: 0;
+        position: relative;
+        z-index: 300;
+        animation: tgHeaderIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    body.tg-mode .tg-header { display: flex; }
+    @keyframes tgHeaderIn {
+        0% { opacity: 0; transform: translateY(-100%); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .tg-close-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: none;
+        color: var(--neon-primary);
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: 10px;
+        transition: background 0.2s ease, transform 0.15s ease;
+        letter-spacing: 0.3px;
+        font-family: inherit;
+    }
+    .tg-close-btn:active {
+        background: rgba(51, 214, 255, 0.12);
+        transform: scale(0.94);
+    }
+    .tg-close-btn svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        filter: drop-shadow(0 0 4px var(--neon-primary));
+    }
+    .tg-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: 0.3px;
+        text-align: center;
+        flex: 1;
+        pointer-events: none;
+        background: linear-gradient(90deg, #33D6FF, #aa66ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .tg-menu-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+    .tg-menu-btn:active {
+        background: rgba(51, 214, 255, 0.1);
+        color: var(--neon-primary);
+    }
+    .tg-menu-btn svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        fill: currentColor;
+        stroke: none;
+    }
+
+    /* ============ SPLASH ============ */
+    .splash {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: #050508; z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.7s ease, visibility 0.7s;
+    }
+    .splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+    .splash-inner { text-align: center; }
+    .splash-logo {
+        font-size: 64px; font-weight: 900; color: var(--neon-primary);
+        letter-spacing: 6px; line-height: 1; margin-bottom: 12px;
+        animation: splashPulse 2s ease-in-out infinite;
+    }
+    @keyframes splashPulse {
+        0%, 100% { text-shadow: 0 0 20px var(--neon-primary), 0 0 60px rgba(51,214,255,0.6); }
+        50%      { text-shadow: 0 0 32px var(--neon-primary), 0 0 90px rgba(51,214,255,0.9); }
+    }
+    .splash-sub {
+        font-size: 11px; color: var(--text-muted);
+        letter-spacing: 5px; text-transform: uppercase; font-weight: 600;
+    }
+    .splash-loader {
+        margin-top: 40px; width: 60px; height: 2px;
+        background: var(--border-color); border-radius: 2px;
+        margin-left: auto; margin-right: auto; overflow: hidden;
+    }
+    .splash-loader::after {
+        content: ''; display: block; height: 100%; width: 40%;
+        background: var(--neon-primary); border-radius: 2px;
+        box-shadow: 0 0 8px var(--neon-primary);
+        animation: splashLoad 1.2s ease-in-out infinite;
+    }
+    @keyframes splashLoad {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(250%); }
+    }
+
+    /* ============ PHONE ============ */
+    .phone {
+        width: 100%; max-width: 420px; height: 100vh; max-height: 100vh;
+        background: var(--bg-primary); position: relative; overflow: hidden;
+        display: flex; flex-direction: column; margin: 0 auto;
+        animation: phoneIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes phoneIn {
+        0% { opacity: 0; transform: scale(0.96); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    @media (min-width: 421px) {
+        body { display: flex; justify-content: center; align-items: center; background: #050508; }
+        .phone {
+            height: 820px; max-height: 95vh; border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset;
+        }
+    }
+    .phone::before, .phone::after {
+        content: ''; position: absolute; border-radius: 50%;
+        pointer-events: none; z-index: 0;
+    }
+    .phone::before {
+        top: -80px; right: -80px; width: 240px; height: 240px;
+        background: radial-gradient(circle, rgba(51,214,255,0.15), transparent 70%);
+        animation: orbFloat1 12s ease-in-out infinite;
+    }
+    .phone::after {
+        bottom: -100px; left: -60px; width: 260px; height: 260px;
+        background: radial-gradient(circle, rgba(170,102,255,0.12), transparent 70%);
+        animation: orbFloat2 14s ease-in-out infinite;
+    }
+    @keyframes orbFloat1 {
+        0%, 100% { transform: translate(0, 0); }
+        50%      { transform: translate(-20px, 20px); }
+    }
+    @keyframes orbFloat2 {
+        0%, 100% { transform: translate(0, 0); }
+        50%      { transform: translate(20px, -20px); }
+    }
+
+    /* ============ SCREENS ============ */
+    .screen {
+        display: none; flex: 1; overflow-y: auto; overflow-x: hidden;
+        padding: 20px 16px 8px; position: relative; z-index: 1;
+        -webkit-overflow-scrolling: touch;
+    }
+    .screen.active { display: block; animation: screenFadeIn 0.45s ease both; }
+    @keyframes screenFadeIn {
+        0% { opacity: 0; transform: translateY(8px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .screen::-webkit-scrollbar { width: 3px; }
+    .screen::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+    /* ============ ONBOARDING ============ */
+    .onboard {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 500; background: var(--bg-primary);
+        display: none; flex-direction: column; overflow: hidden;
+    }
+    .onboard.active { display: flex; }
+    .onboard-track {
+        display: flex; flex: 1; width: 100%;
+        transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: transform;
+    }
+    .onboard-step {
+        min-width: 100%; max-width: 100%; width: 100%; flex: 0 0 100%;
+        padding: 30px 24px 24px; display: flex; flex-direction: column;
+        overflow-y: auto; box-sizing: border-box;
+    }
+    .onboard-logo {
+        font-size: 42px; font-weight: 900; color: var(--neon-primary);
+        letter-spacing: 4px;
+        text-shadow: 0 0 20px var(--neon-primary), 0 0 60px rgba(51,214,255,0.5);
+        line-height: 1; margin-bottom: 6px;
+        animation: logoGlow 3s ease-in-out infinite;
+    }
+    @keyframes logoGlow {
+        0%, 100% { text-shadow: 0 0 20px var(--neon-primary), 0 0 60px rgba(51,214,255,0.5); }
+        50%      { text-shadow: 0 0 30px var(--neon-primary), 0 0 80px rgba(51,214,255,0.8); }
+    }
+    .onboard-logo-sub {
+        font-size: 11px; color: var(--text-muted); letter-spacing: 4px;
+        text-transform: uppercase; font-weight: 600; margin-bottom: 40px;
+    }
+    .onboard-title {
+        font-size: 28px; font-weight: 800; line-height: 1.2; margin-bottom: 10px;
+        animation: fadeUp 0.6s ease both;
+    }
+    .onboard-title .accent {
+        color: var(--neon-primary);
+        text-shadow: 0 0 16px rgba(51,214,255,0.5);
+    }
+    .onboard-sub {
+        font-size: 14px; color: var(--text-secondary);
+        line-height: 1.5; margin-bottom: 24px;
+        animation: fadeUp 0.6s 0.1s ease both;
+    }
+    @keyframes fadeUp {
+        0% { opacity: 0; transform: translateY(12px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .onboard-input {
+        width: 100%; padding: 18px 20px; background: var(--bg-input);
+        border: 2px solid var(--border-color); border-radius: var(--radius);
+        color: var(--text-primary); font-size: 18px; font-weight: 600;
+        outline: none; margin-bottom: 16px; transition: all 0.25s ease;
+        font-family: inherit;
+    }
+    .onboard-input:focus {
+        border-color: var(--neon-primary);
+        box-shadow: 0 0 24px rgba(51,214,255,0.25);
+        transform: translateY(-2px);
+    }
+    .onboard-input.shake {
+        animation: inputShake 0.4s ease; border-color: var(--neon-red);
+    }
+    @keyframes inputShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-6px); }
+        75% { transform: translateX(6px); }
+    }
+    .onboard-input::placeholder { color: var(--text-muted); font-weight: 400; }
+
+    .onboard-templates {
+        display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;
+    }
+    .onboard-template {
+        display: flex; align-items: flex-start; gap: 14px; padding: 16px;
+        background: var(--bg-card); border: 2px solid var(--border-color);
+        border-radius: var(--radius); cursor: pointer; transition: all 0.3s ease;
+        position: relative; overflow: hidden; text-align: left;
+        width: 100%; color: var(--text-primary);
+        animation: fadeUp 0.5s ease both;
+    }
+    .onboard-template:nth-child(1) { animation-delay: 0.1s; }
+    .onboard-template:nth-child(2) { animation-delay: 0.2s; }
+    .onboard-template:nth-child(3) { animation-delay: 0.3s; }
+    .onboard-template::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+        width: 3px; background: var(--tpl-color, var(--neon-primary));
+        opacity: 0.5; transition: all 0.3s;
+    }
+    .onboard-template.selected {
+        border-color: var(--tpl-color, var(--neon-primary));
+        background: linear-gradient(135deg, rgba(51,214,255,0.06), transparent);
+        box-shadow: 0 0 24px rgba(51,214,255,0.15);
+        transform: translateY(-2px);
+    }
+    .onboard-template.selected::before {
+        opacity: 1; box-shadow: 0 0 12px var(--tpl-color, var(--neon-primary));
+    }
+    .onboard-tpl-icon {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; transition: transform 0.3s ease;
+    }
+    .onboard-template.selected .onboard-tpl-icon { transform: scale(1.1) rotate(-4deg); }
+    .onboard-tpl-icon svg {
+        width: 26px; height: 26px; stroke: currentColor; fill: none;
+        stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .onboard-tpl-icon.blue   { background: rgba(51,214,255,0.1); color: var(--neon-primary); }
+    .onboard-tpl-icon.green  { background: rgba(0,255,170,0.1);  color: var(--neon-green); }
+    .onboard-tpl-icon.purple { background: rgba(170,102,255,0.1); color: var(--neon-purple); }
+    .onboard-tpl-info { flex: 1; min-width: 0; }
+    .onboard-tpl-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .onboard-tpl-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+    .onboard-btn {
+        width: 100%; padding: 18px;
+        background: linear-gradient(135deg, var(--neon-primary), #1a9fcc);
+        color: #0a0a0f; border-radius: var(--radius);
+        font-size: 16px; font-weight: 800; letter-spacing: 0.5px;
+        box-shadow: 0 0 24px rgba(51,214,255,0.4);
+        transition: transform 0.2s, box-shadow 0.3s; margin-top: auto;
+        position: relative; overflow: hidden;
+    }
+    .onboard-btn::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+        transform: translateX(-100%);
+        animation: shimmer 2.5s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        50%, 100% { transform: translateX(100%); }
+    }
+    .onboard-btn:active { transform: scale(0.97); box-shadow: 0 0 40px rgba(51,214,255,0.7); }
+    .onboard-skip {
+        width: 100%; padding: 14px; color: var(--text-muted);
+        font-size: 13px; text-align: center; margin-top: 8px;
+        transition: color 0.2s;
+    }
+    .onboard-skip:active { color: var(--text-secondary); }
+
+    .onboard-progress {
+        display: flex; gap: 6px; justify-content: center; margin-top: 16px;
+    }
+    .onboard-progress-dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--border-color); transition: all 0.4s ease;
+    }
+    .onboard-progress-dot.active {
+        width: 20px; border-radius: 3px; background: var(--neon-primary);
+        box-shadow: 0 0 8px var(--neon-primary);
+    }
+    .onboard-success {
+        flex: 1; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        text-align: center; gap: 20px;
+    }
+    .onboard-success-icon {
+        width: 100px; height: 100px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(0,255,170,0.15), transparent 70%);
+        border: 2px solid rgba(0,255,170,0.3);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--neon-green);
+        animation: successPulse 2s ease-in-out infinite, successIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes successIn {
+        0% { transform: scale(0); }
+        100% { transform: scale(1); }
+    }
+    .onboard-success-icon svg {
+        width: 48px; height: 48px; stroke: currentColor; fill: none;
+        stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+        stroke-dasharray: 50; stroke-dashoffset: 50;
+        animation: checkDraw 0.7s 0.3s ease forwards;
+    }
+    @keyframes checkDraw {
+        to { stroke-dashoffset: 0; }
+    }
+    @keyframes successPulse {
+        0%, 100% { box-shadow: 0 0 20px rgba(0,255,170,0.3); }
+        50%      { box-shadow: 0 0 40px rgba(0,255,170,0.6); }
+    }
+    .onboard-success-title { font-size: 26px; font-weight: 800; }
+    .onboard-success-text {
+        font-size: 14px; color: var(--text-secondary);
+        line-height: 1.5; max-width: 300px;
+    }
+
+    /* ============ HEADER ============ */
+    .h-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .h-brand { display: flex; align-items: baseline; gap: 8px; }
+    .h-brand-logo {
+        font-size: 22px; font-weight: 900; color: var(--neon-primary);
+        letter-spacing: 2px;
+        text-shadow: 0 0 12px var(--neon-primary), 0 0 32px rgba(51,214,255,0.5);
+        line-height: 1;
+    }
+    .h-brand-sub {
+        font-size: 9px; color: var(--text-muted); letter-spacing: 2px;
+        text-transform: uppercase; font-weight: 600;
+    }
+
+    /* ============ STREAK HEADER ============ */
+    .streak-header {
+        display: flex; align-items: center; gap: 6px;
+        padding: 6px 12px; background: var(--bg-card);
+        border: 1px solid var(--streak-color, var(--neon-orange));
+        border-radius: 30px; position: relative; overflow: hidden;
+        transition: all 0.5s ease;
+    }
+    .streak-header::before {
+        content: ''; position: absolute; inset: 0;
+        background: radial-gradient(circle at 30% 50%, var(--streak-glow, rgba(255,136,68,0.25)), transparent 70%);
+        pointer-events: none; transition: background 0.5s;
+    }
+    .streak-header-icon {
+        width: 20px; height: 20px; display: flex;
+        align-items: center; justify-content: center;
+        color: var(--streak-color, var(--neon-orange));
+        position: relative; z-index: 1; transition: color 0.5s;
+    }
+    .streak-header-icon svg {
+        width: 100%; height: 100%; stroke: currentColor; fill: none;
+        stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .streak-header-value {
+        font-size: 15px; font-weight: 800; font-family: var(--font-mono);
+        color: var(--streak-color, var(--neon-orange));
+        position: relative; z-index: 1; line-height: 1; transition: color 0.5s;
+        display: inline-block;
+    }
+    .streak-header-label {
+        font-size: 9px; color: var(--text-muted); font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.8px;
+        position: relative; z-index: 1;
+    }
+    .streak-header.pulse { animation: streakPulseBig 2.4s ease-in-out infinite; }
+    @keyframes streakPulseBig {
+        0%, 100% { box-shadow: 0 0 12px var(--streak-glow, rgba(255,136,68,0.4)); }
+        50%      { box-shadow: 0 0 24px var(--streak-glow, rgba(255,136,68,0.7)); }
+    }
+    .streak-header.rainbow {
+        border: 2px solid;
+        border-image: linear-gradient(90deg, #ff3377, #ffdd00, #00ffaa, #33D6FF, #aa66ff) 1;
+        border-radius: 30px;
+    }
+    .streak-header.rainbow .streak-header-value {
+        background: linear-gradient(90deg, #ff3377, #ffdd00, #00ffaa, #33D6FF, #aa66ff, #ff3377);
+        background-size: 300% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: rainbowShift 3s linear infinite;
+    }
+    @keyframes rainbowShift {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 300% 50%; }
+    }
+    .streak-header-value.bump { animation: streakBump 0.65s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes streakBump {
+        0%   { transform: scale(1); }
+        40%  { transform: scale(1.6) rotate(-6deg); }
+        70%  { transform: scale(1.15) rotate(3deg); }
+        100% { transform: scale(1) rotate(0); }
+    }
+    .streak-header.flash::after {
+        content: ''; position: absolute; inset: 0;
+        background: radial-gradient(circle, rgba(255,255,255,0.5), transparent 70%);
+        animation: flashFade 0.7s ease forwards;
+        pointer-events: none;
+    }
+    @keyframes flashFade {
+        0% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    /* ============ GREETING ============ */
+    .greeting {
+        margin-bottom: 10px; padding: 16px 18px;
+        background: linear-gradient(135deg, rgba(51,214,255,0.06), rgba(170,102,255,0.04));
+        border: 1px solid rgba(51,214,255,0.12);
+        border-radius: var(--radius);
+        display: flex; align-items: center; gap: 14px;
+        position: relative; overflow: hidden;
+    }
+    .greeting::before {
+        content: ''; position: absolute;
+        top: -40%; right: -15%; width: 140px; height: 140px;
+        background: radial-gradient(circle, rgba(51,214,255,0.18), transparent 70%);
+        pointer-events: none;
+        animation: greetingOrb 8s ease-in-out infinite;
+    }
+    @keyframes greetingOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50%      { transform: translate(-20px, 20px) scale(1.2); }
+    }
+    .greeting-text { flex: 1; min-width: 0; position: relative; }
+    .greeting-hi { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+    .greeting-date { font-size: 12px; color: var(--text-secondary); }
+
+    .energy-ring {
+        width: 68px; height: 68px; flex-shrink: 0;
+        position: relative; display: flex;
+        align-items: center; justify-content: center;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .energy-ring.pulse { animation: ringPulse 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes ringPulse {
+        0%   { transform: scale(1); }
+        45%  { transform: scale(1.14); }
+        100% { transform: scale(1); }
+    }
+    .energy-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .energy-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+    .energy-ring .bg { stroke: rgba(51,214,255,0.12); }
+    .energy-ring .fg {
+        stroke: var(--neon-primary); stroke-dasharray: 176;
+        stroke-dashoffset: 176; transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        filter: drop-shadow(0 0 4px rgba(51,214,255,0.6));
+    }
+    .energy-ring-value {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+    }
+    .energy-ring-value .num {
+        font-size: 16px; font-weight: 800;
+        font-family: var(--font-mono); line-height: 1;
+    }
+    .energy-ring-value .num.bump { animation: numBump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes numBump {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+    .energy-ring-value .lbl {
+        font-size: 8px; color: var(--text-muted);
+        letter-spacing: 1px; text-transform: uppercase;
+        margin-top: 2px; font-weight: 600;
+    }
+
+    /* ============ PROGRESS ============ */
+    .day-progress {
+        height: 3px; background: var(--bg-input);
+        border-radius: 2px; overflow: hidden; margin-bottom: 10px;
+        position: relative;
+    }
+    .day-progress-fill {
+        height: 100%; width: 0%;
+        background: linear-gradient(90deg, var(--neon-primary), var(--neon-purple));
+        border-radius: 2px;
+        transition: width 1.1s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        box-shadow: 0 0 8px rgba(51,214,255,0.5);
+    }
+    .day-progress-fill::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+        animation: progressShine 2.4s ease-in-out infinite;
+    }
+    @keyframes progressShine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+    .day-hint {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 12px; padding: 0 4px;
+        font-size: 11px; color: var(--text-muted);
+    }
+    .day-hint strong {
+        color: var(--neon-primary); font-weight: 700; font-family: var(--font-mono);
+    }
+
+    /* ============ DAYS STRIP ============ */
+    .days-strip {
+        background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--radius); padding: 12px; margin-bottom: 12px;
+    }
+    .days-strip-header {
+        display: flex; justify-content: space-between; align-items: baseline;
+        margin-bottom: 10px; padding: 0 4px;
+    }
+    .days-strip-title {
+        font-size: 10px; color: var(--text-muted);
+        text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700;
+    }
+    .days-strip-range {
+        font-size: 11px; color: var(--text-secondary); font-family: var(--font-mono);
+    }
+    .days-strip-line {
+        display: flex; align-items: flex-start;
+        justify-content: space-between; gap: 4px;
+    }
+    .day-node {
+        flex: 1; display: flex; flex-direction: column;
+        align-items: center; gap: 5px; position: relative;
+    }
+    .day-dot {
+        width: 30px; height: 30px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--bg-input); border: 2px solid var(--border-color);
+        position: relative; z-index: 2; transition: all 0.3s ease;
+    }
+    .day-dot svg {
+        width: 13px; height: 13px; stroke: currentColor; fill: none;
+        stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .day-label {
+        font-size: 9px; color: var(--text-muted);
+        font-weight: 700; letter-spacing: 0.5px;
+    }
+    .day-node:not(:last-child)::after {
+        content: ''; position: absolute; top: 15px;
+        left: calc(50% + 15px); right: calc(-50% + 15px);
+        height: 2px; background: var(--border-color); z-index: 1;
+        transition: background 0.4s ease;
+    }
+    .day-node.done:not(:last-child)::after { background: rgba(0,255,170,0.5); }
+    .day-node.done .day-dot {
+        background: rgba(0,255,170,0.1);
+        border-color: var(--neon-green); color: var(--neon-green);
+        box-shadow: 0 0 10px rgba(0,255,170,0.3);
+    }
+    .day-node.done .day-label { color: var(--neon-green); }
+    .day-node.missed .day-dot {
+        background: rgba(255,51,119,0.06);
+        border-color: rgba(255,51,119,0.5); color: var(--neon-red);
+    }
+    .day-node.missed .day-label { color: var(--neon-red); }
+    .day-node.missed .day-dot svg { transform: rotate(45deg); }
+    .day-node.today .day-dot {
+        background: rgba(51,214,255,0.12);
+        border-color: var(--neon-primary); color: var(--neon-primary);
+        animation: todayPulse 2s ease-in-out infinite;
+    }
+    @keyframes todayPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(51,214,255,0.4); }
+        50%      { box-shadow: 0 0 0 8px rgba(51,214,255,0); }
+    }
+    .day-node.today .day-label { color: var(--neon-primary); }
+    .day-node.future .day-dot { opacity: 0.4; border-style: dashed; }
+    .day-node.future .day-label { opacity: 0.5; }
+
+    /* ============ SECTION ============ */
+    .section-title {
+        font-size: 11px; font-weight: 700; color: var(--text-secondary);
+        letter-spacing: 1.2px; text-transform: uppercase;
+        margin-bottom: 10px; display: flex;
+        justify-content: space-between; align-items: center;
+    }
+
+    /* ============ HABIT CARD ============ */
+    .habit-card {
+        position: relative; background: var(--bg-card);
+        border: 1px solid var(--border-color); border-radius: var(--radius);
+        padding: 14px 16px 14px 20px; margin-bottom: 10px;
+        display: flex; align-items: center; gap: 14px;
+        overflow: hidden;
+        -webkit-user-select: none; user-select: none;
+        transform-style: preserve-3d;
+        transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        will-change: transform, opacity;
+    }
+    .habit-card::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+        width: 3px; background: var(--habit-color, var(--neon-primary));
+        z-index: 2; transition: box-shadow 0.3s;
+    }
+    .habit-card:active:not(.locked) {
+        transform: scale(0.985);
+    }
+    .habit-card.locked { pointer-events: none; }
+    .habit-card.drawer-close {
+        animation: drawerClose 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes drawerClose {
+        0% { transform: translateY(0) scale(1) rotateX(0); opacity: 1; }
+        40% { transform: translateY(6px) scale(0.96) rotateX(-2deg); opacity: 0.9; }
+        100% { transform: translateY(120%) scale(0.7) rotateX(-8deg); opacity: 0; }
+    }
+    .habit-card.drawer-open {
+        animation: drawerOpen 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes drawerOpen {
+        0% { transform: translateY(120%) scale(0.7) rotateX(-8deg); opacity: 0; }
+        60% { transform: translateY(-6px) scale(1.02) rotateX(1deg); opacity: 1; }
+        100% { transform: translateY(0) scale(1) rotateX(0); opacity: 1; }
+    }
+    .habit-card.removing { animation: cardOut 0.4s ease forwards; }
+    @keyframes cardOut {
+        0% { opacity: 1; transform: scale(1) translateX(0); max-height: 200px; }
+        100% { opacity: 0; transform: scale(0.9) translateX(-40px); max-height: 0; padding: 0; margin: 0; border: 0; }
+    }
+    .habit-card.checked::before {
+        box-shadow: 0 0 12px var(--habit-color);
+    }
+
+    .habit-delete-btn {
+        position: absolute; top: 8px; right: 8px;
+        width: 26px; height: 26px; border-radius: 50%;
+        background: rgba(255,51,119,0.15);
+        border: 1px solid rgba(255,51,119,0.4);
+        color: var(--neon-red);
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none;
+        transition: all 0.3s ease; z-index: 5;
+    }
+    .habit-delete-btn svg {
+        width: 12px; height: 12px; stroke: currentColor; fill: none;
+        stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .habit-card.show-delete .habit-delete-btn {
+        opacity: 1; pointer-events: auto;
+        animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popIn {
+        0% { transform: scale(0); }
+        100% { transform: scale(1); }
+    }
+
+    .fill-layer {
+        position: absolute; top: 0; left: 0; bottom: 0; width: 0%;
+        background: linear-gradient(90deg,
+            var(--habit-color, #33D6FF) 0%,
+            var(--habit-color, #33D6FF) 100%);
+        opacity: 0.22;
+        pointer-events: none; z-index: 0;
+        transition: width 0.55s ease;
+    }
+    .fill-layer.ritual {
+        transition: width 3s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0.32;
+    }
+    .fill-layer.ritual::after {
+        content: ''; position: absolute;
+        right: 0; top: 0; bottom: 0; width: 20px;
+        background: linear-gradient(90deg, transparent, var(--habit-color, #33D6FF));
+        opacity: 0.9;
+        filter: blur(2px);
+        animation: fillGlow 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes fillGlow {
+        0% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    .ripple {
+        position: absolute; border-radius: 50%;
+        background: radial-gradient(circle, var(--habit-color, #33D6FF), transparent 70%);
+        opacity: 0.45;
+        transform: translate(-50%, -50%) scale(0);
+        pointer-events: none; z-index: 4;
+        animation: rippleGrow 0.7s ease-out forwards;
+    }
+    @keyframes rippleGrow {
+        0% { transform: translate(-50%, -50%) scale(0); opacity: 0.5; }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+    }
+    .spark {
+        position: absolute; width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--habit-color, #33D6FF);
+        pointer-events: none; z-index: 6;
+        box-shadow: 0 0 8px var(--habit-color, #33D6FF);
+    }
+
+    .done-check {
+        position: absolute; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        pointer-events: none; z-index: 7;
+        opacity: 0;
+    }
+    .done-check.show {
+        animation: doneCheckFade 1.6s ease forwards;
+    }
+    @keyframes doneCheckFade {
+        0% { opacity: 0; transform: scale(0.5); }
+        30% { opacity: 1; transform: scale(1.15); }
+        60% { opacity: 1; transform: scale(1); }
+        100% { opacity: 0; transform: scale(1.4); }
+    }
+    .done-check-inner {
+        width: 60px; height: 60px; border-radius: 50%;
+        background: radial-gradient(circle, var(--habit-color, #33D6FF), rgba(0,0,0,0.1));
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 0 32px var(--habit-color, #33D6FF), 0 0 60px rgba(0,0,0,0.6) inset;
+    }
+    .done-check-inner svg {
+        width: 32px; height: 32px;
+        stroke: #0a0a0f; fill: none;
+        stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round;
+        stroke-dasharray: 50; stroke-dashoffset: 50;
+        animation: checkDraw 0.6s 0.3s ease forwards;
+    }
+
+    .habit-content {
+        position: relative; z-index: 3;
+        display: flex; align-items: center; gap: 12px; width: 100%;
+    }
+    .habit-controls {
+        display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
+    }
+    .habit-step-btn {
+        width: 32px; height: 32px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--bg-input); border: 1.5px solid var(--border-color);
+        color: var(--text-secondary); transition: all 0.25s ease;
+        position: relative; overflow: hidden;
+    }
+    .habit-step-btn svg {
+        width: 16px; height: 16px; stroke: currentColor; fill: none;
+        stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round;
+        transition: transform 0.25s ease;
+    }
+    .habit-step-btn:active { transform: scale(0.85); }
+    .habit-step-btn.plus {
+        background: rgba(51,214,255,0.12);
+        border-color: rgba(51,214,255,0.4);
+        color: var(--neon-primary);
+    }
+    .habit-step-btn.plus:active svg { transform: rotate(90deg); }
+    .habit-step-btn.minus:disabled { opacity: 0.3; pointer-events: none; }
+    .habit-step-btn.minus.shake { animation: inputShake 0.4s ease; }
+
+    .habit-info { flex: 1; min-width: 0; }
+    .habit-name {
+        font-size: 15px; font-weight: 600; margin-bottom: 6px;
+        display: flex; align-items: center; gap: 8px;
+        transition: color 0.35s ease;
+    }
+    .habit-name.completed {
+        color: var(--text-secondary);
+        text-decoration: line-through;
+        text-decoration-color: var(--text-muted);
+    }
+    .habit-streak-badge {
+        display: inline-flex; align-items: center; gap: 3px;
+        color: var(--neon-yellow); font-weight: 700; font-size: 10px;
+        padding: 2px 6px; background: rgba(255,221,0,0.08);
+        border-radius: 6px; font-family: var(--font-mono);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .habit-streak-badge.hidden { display: none; }
+    .habit-streak-badge.bump { animation: badgeBump 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes badgeBump {
+        0%   { transform: scale(1); background: rgba(255,221,0,0.08); }
+        40%  { transform: scale(1.4); background: rgba(255,221,0,0.4); }
+        100% { transform: scale(1); background: rgba(255,221,0,0.08); }
+    }
+    .habit-streak-badge svg {
+        width: 10px; height: 10px; stroke: currentColor; fill: none;
+        stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .habit-water-label {
+        display: flex; justify-content: space-between;
+        font-size: 10px; color: var(--text-muted);
+        margin-bottom: 5px; font-family: var(--font-mono); font-weight: 600;
+    }
+    .habit-water-label .current {
+        color: var(--neon-primary); font-weight: 700;
+        display: inline-block; transition: color 0.3s;
+    }
+    .habit-water-label .current.bump { animation: numBump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .habit-water-scale {
+        height: 6px; background: var(--bg-input);
+        border-radius: 3px; overflow: hidden;
+    }
+    .habit-water-scale-fill {
+        height: 100%; width: 0%;
+        background: linear-gradient(90deg, var(--habit-color, #33D6FF), rgba(51,214,255,0.5));
+        border-radius: 3px;
+        transition: width 0.5s ease;
+        box-shadow: 0 0 6px var(--habit-color, #33D6FF);
+    }
+    .habit-icon-wrap {
+        width: 42px; height: 42px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .habit-icon-wrap.bounce { animation: iconBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes iconBounce {
+        0%   { transform: scale(1) rotate(0); }
+        40%  { transform: scale(1.2) rotate(-8deg); }
+        70%  { transform: scale(0.95) rotate(4deg); }
+        100% { transform: scale(1) rotate(0); }
+    }
+    .habit-icon-wrap svg {
+        width: 22px; height: 22px; stroke: currentColor; fill: none;
+        stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* ============ STATS ============ */
+    .stats-row {
+        display: grid; grid-template-columns: 1fr 1fr;
+        gap: 10px; margin-bottom: 20px;
+    }
+    .stat-box {
+        background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); padding: 14px;
+        position: relative; overflow: hidden;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    .stat-box:active { transform: scale(0.97); border-color: var(--neon-primary); }
+    .stat-box::before {
+        content: ''; position: absolute; top: 0; right: 0;
+        width: 60px; height: 60px;
+        background: radial-gradient(circle, rgba(51,214,255,0.15), transparent 70%);
+        pointer-events: none;
+    }
+    .stat-box-label {
+        font-size: 10px; color: var(--text-muted);
+        text-transform: uppercase; letter-spacing: 1px;
+        margin-bottom: 8px; position: relative;
+    }
+    .stat-box-value {
+        font-size: 24px; font-weight: 800;
+        font-family: var(--font-mono); position: relative; line-height: 1;
+        display: inline-block;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .stat-box-value.bump { animation: numBump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .stat-box-value.green { color: var(--neon-green); }
+    .stat-box-value.yellow { color: var(--neon-yellow); }
+    .stat-box-value.purple { color: var(--neon-purple); }
+    .stat-box-value.cyan { color: var(--neon-primary); }
+
+    .heatmap-wrap {
+        background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--radius); padding: 14px; margin-bottom: 16px;
+    }
+    .heatmap {
+        display: grid; grid-template-columns: repeat(26, 1fr); gap: 3px;
+    }
+    .heat-cell {
+        aspect-ratio: 1; border-radius: 3px; background: var(--bg-input);
+        transition: transform 0.2s ease, background 0.3s ease;
+        animation: heatIn 0.4s ease both;
+    }
+    @keyframes heatIn {
+        0% { opacity: 0; transform: scale(0.4); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    .heat-cell.l1 { background: rgba(51, 214, 255, 0.15); }
+    .heat-cell.l2 { background: rgba(51, 214, 255, 0.35); }
+    .heat-cell.l3 { background: rgba(51, 214, 255, 0.6); }
+    .heat-cell.l4 { background: var(--neon-primary); box-shadow: 0 0 6px rgba(51,214,255,0.6); }
+    .heat-cell.future { opacity: 0.25; }
+    .heat-cell:hover { transform: scale(1.3); }
+
+    /* ============ LIST ITEM ============ */
+    .habit-list-item {
+        background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--radius); margin-bottom: 10px;
+        position: relative; overflow: hidden;
+        animation: listItemIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes listItemIn {
+        0% { opacity: 0; transform: translateX(-20px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+    .habit-list-item::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+        width: 3px; background: var(--habit-color, var(--neon-primary));
+        z-index: 5;
+    }
+    .habit-list-item.removing { animation: cardOut 0.4s ease forwards; }
+    .habit-list-delete {
+        position: absolute; right: 0; top: 0; bottom: 0; width: 0;
+        background: linear-gradient(90deg, rgba(255,51,119,0.05), rgba(255,51,119,0.2));
+        color: var(--neon-red);
+        display: flex; align-items: center; justify-content: center;
+        transition: width 0.3s ease; overflow: hidden; z-index: 0;
+    }
+    .habit-list-delete svg {
+        width: 20px; height: 20px; stroke: currentColor; fill: none;
+        stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+        opacity: 0; transition: opacity 0.2s;
+    }
+    .habit-list-item.swiped .habit-list-delete { width: 70px; }
+    .habit-list-item.swiped .habit-list-delete svg { opacity: 1; }
+    .habit-list-content {
+        position: relative; z-index: 1;
+        padding: 14px 16px 14px 20px;
+        display: flex; align-items: center; gap: 14px;
+        background: var(--bg-card);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .habit-list-item.swiped .habit-list-content { transform: translateX(-70px); }
+    .habit-list-icon {
+        width: 44px; height: 44px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .habit-list-icon svg {
+        width: 22px; height: 22px; stroke: currentColor; fill: none;
+        stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .habit-list-info { flex: 1; min-width: 0; }
+    .habit-list-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .habit-list-schedule { font-size: 11px; color: var(--text-muted); }
+    .habit-list-right {
+        display: flex; flex-direction: column;
+        align-items: flex-end; gap: 4px;
+    }
+    .habit-list-streak {
+        display: inline-flex; align-items: center; gap: 3px;
+        font-weight: 700; font-size: 13px; font-family: var(--font-mono);
+        color: var(--streak-color, var(--neon-yellow));
+    }
+    .habit-list-streak.hidden { visibility: hidden; }
+    .habit-list-streak svg {
+        width: 13px; height: 13px; stroke: currentColor; fill: none;
+        stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* ============ ADD BTN ============ */
+    .add-btn {
+        width: 100%; padding: 14px; margin-bottom: 16px;
+        background: rgba(51,214,255,0.06);
+        border: 1px dashed rgba(51,214,255,0.35);
+        border-radius: var(--radius); color: var(--neon-primary);
+        font-size: 13px; font-weight: 700;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        transition: all 0.25s ease;
+    }
+    .add-btn:active {
+        background: rgba(51,214,255,0.12); border-style: solid;
+        transform: scale(0.98);
+    }
+    .add-btn svg {
+        width: 18px; height: 18px; stroke: currentColor; fill: none;
+        stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+        transition: transform 0.3s ease;
+    }
+    .add-btn:active svg { transform: rotate(90deg); }
+
+    /* ============ PROFILE ============ */
+    .profile-header {
+        display: flex; align-items: center; gap: 16px;
+        background: linear-gradient(135deg, rgba(51,214,255,0.06), rgba(170,102,255,0.06));
+        border: 1px solid rgba(51,214,255,0.15);
+        border-radius: var(--radius); padding: 18px; margin-bottom: 20px;
+        position: relative; overflow: hidden;
+    }
+    .profile-header::before {
+        content: ''; position: absolute; top: -50%; right: -20%;
+        width: 180px; height: 180px;
+        background: radial-gradient(circle, rgba(51,214,255,0.15), transparent 70%);
+        animation: greetingOrb 10s ease-in-out infinite;
+    }
+    .profile-avatar {
+        width: 60px; height: 60px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--neon-primary), var(--neon-purple));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 26px; font-weight: 900; color: #0a0a0f; flex-shrink: 0;
+        box-shadow: 0 0 24px rgba(51,214,255,0.4);
+        animation: avatarFloat 4s ease-in-out infinite;
+    }
+    @keyframes avatarFloat {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-4px); }
+    }
+    .profile-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; position: relative; }
+    .profile-sub { font-size: 12px; color: var(--text-muted); position: relative; }
+
+    .settings-list { display: flex; flex-direction: column; gap: 6px; }
+    .settings-item {
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); padding: 14px 16px;
+        cursor: pointer; transition: all 0.25s ease;
+        animation: listItemIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .settings-item:nth-child(1) { animation-delay: 0.05s; }
+    .settings-item:nth-child(2) { animation-delay: 0.1s; }
+    .settings-item:nth-child(3) { animation-delay: 0.15s; }
+    .settings-item:active {
+        background: var(--bg-secondary);
+        border-color: var(--neon-primary);
+        transform: scale(0.98);
+    }
+    .settings-left { display: flex; align-items: center; gap: 12px; }
+    .settings-left svg {
+        width: 20px; height: 20px; stroke: var(--text-secondary); fill: none;
+        stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .settings-label { font-size: 14px; }
+    .settings-value { font-size: 13px; color: var(--text-muted); }
+    .settings-arrow {
+        color: var(--text-muted); font-size: 18px;
+        transition: transform 0.3s ease;
+    }
+    .settings-item:active .settings-arrow { transform: translateX(4px); }
+    .settings-item.danger { border-color: rgba(255,51,119,0.4); }
+    .settings-item.danger svg { stroke: var(--neon-red); }
+    .settings-item.danger .settings-label { color: var(--neon-red); }
+
+    /* ============ BOTTOM NAV ============ */
+    .bottom-nav {
+        display: flex; justify-content: space-around; align-items: center;
+        padding: 10px 4px 14px; border-top: 1px solid var(--border-light);
+        background: var(--bg-primary); position: relative;
+        z-index: 10; flex-shrink: 0;
+    }
+    .nav-btn {
+        display: flex; flex-direction: column;
+        align-items: center; gap: 4px; color: #9CA3AF;
+        padding: 6px 12px; position: relative;
+        transition: color 0.25s ease; min-width: 56px;
+    }
+    .nav-btn svg {
+        width: 22px; height: 22px; stroke: currentColor; fill: none;
+        stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .nav-btn.active { color: var(--neon-primary); }
+    .nav-btn.active svg {
+        stroke: var(--neon-primary);
+        transform: translateY(-3px) scale(1.1);
+    }
+    .nav-btn.active::before {
+        content: ''; position: absolute; top: -11px; left: 50%;
+        transform: translateX(-50%); width: 24px; height: 3px;
+        background: var(--neon-primary); border-radius: 0 0 4px 4px;
+        box-shadow: 0 0 12px var(--neon-primary);
+        animation: navBarIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes navBarIn {
+        0% { transform: translateX(-50%) scaleX(0); }
+        100% { transform: translateX(-50%) scaleX(1); }
+    }
+    .nav-btn:active svg { transform: scale(0.9); }
+    .nav-btn.active:active svg { transform: translateY(-3px) scale(0.95); }
+    .nav-label { font-size: 9px; letter-spacing: 0.4px; font-weight: 600; }
+
+    /* ============ MODAL ============ */
+    .modal-overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.75); z-index: 200;
+        display: none; align-items: flex-end; justify-content: center;
+        opacity: 0; transition: opacity 0.35s ease;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; opacity: 1; }
+    .modal-sheet {
+        width: 100%; max-width: 420px; background: var(--bg-secondary);
+        border-radius: 24px 24px 0 0; padding: 12px 20px 30px;
+        max-height: 90%; overflow-y: auto;
+        transform: translateY(100%);
+        transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        will-change: transform;
+    }
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+    .modal-overlay.closing .modal-sheet {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 1, 1);
+        transform: translateY(100%);
+    }
+    .sheet-handle {
+        width: 40px; height: 4px; background: var(--border-color);
+        border-radius: 4px; margin: 0 auto 16px;
+    }
+    .sheet-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; text-align: center; }
+    .sheet-subtitle {
+        font-size: 12px; color: var(--text-muted);
+        text-align: center; margin-bottom: 20px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+        display: block; font-size: 12px; color: var(--text-secondary);
+        margin-bottom: 8px; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .form-input {
+        width: 100%; padding: 14px 16px; background: var(--bg-input);
+        border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+        color: var(--text-primary); font-size: 15px; outline: none;
+        transition: all 0.25s; font-family: inherit;
+    }
+    .form-input:focus {
+        border-color: var(--neon-primary);
+        box-shadow: 0 0 0 3px rgba(51,214,255,0.15);
+        transform: translateY(-1px);
+    }
+    .form-input.shake { animation: inputShake 0.4s ease; border-color: var(--neon-red); }
+    .form-input::placeholder { color: var(--text-muted); }
+
+    .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .icon-opt {
+        aspect-ratio: 1; border-radius: var(--radius-sm);
+        background: var(--bg-input); border: 1.5px solid var(--border-color);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-secondary); transition: all 0.25s ease;
+    }
+    .icon-opt svg {
+        width: 24px; height: 24px; stroke: currentColor; fill: none;
+        stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .icon-opt:active { transform: scale(0.9); }
+    .icon-opt.selected {
+        border-color: var(--neon-primary);
+        background: rgba(51,214,255,0.08); color: var(--neon-primary);
+        transform: scale(1.05);
+        box-shadow: 0 0 16px rgba(51,214,255,0.3);
+    }
+    .color-grid { display: flex; gap: 10px; justify-content: space-between; }
+    .color-opt {
+        flex: 1; aspect-ratio: 1; border-radius: 50%;
+        border: 2px solid transparent; position: relative;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .color-opt::after {
+        content: ''; position: absolute;
+        top: 5px; left: 5px; right: 5px; bottom: 5px;
+        border-radius: 50%; background: currentColor;
+        box-shadow: 0 0 8px currentColor;
+    }
+    .color-opt.selected {
+        border-color: #fff;
+        transform: scale(1.18) rotate(-8deg);
+    }
+
+    .unit-selector {
+        display: flex; gap: 4px; background: var(--bg-input);
+        padding: 4px; border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+    }
+    .unit-opt {
+        flex: 1; padding: 10px 4px; border-radius: 8px;
+        color: var(--text-secondary); font-size: 12px; font-weight: 700;
+        transition: all 0.25s ease; text-align: center;
+    }
+    .unit-opt:active { transform: scale(0.94); }
+    .unit-opt.active {
+        background: rgba(51,214,255,0.12); color: var(--neon-primary);
+        box-shadow: 0 0 12px rgba(51,214,255,0.25) inset;
+    }
+
+    .target-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .target-chip {
+        padding: 8px 14px; background: var(--bg-input);
+        border: 1.5px solid var(--border-color); border-radius: 20px;
+        color: var(--text-secondary); font-size: 13px; font-weight: 700;
+        font-family: var(--font-mono); transition: all 0.25s ease;
+    }
+    .target-chip:active { transform: scale(0.92); }
+    .target-chip.selected {
+        background: rgba(51,214,255,0.12);
+        border-color: var(--neon-primary); color: var(--neon-primary);
+        transform: scale(1.08);
+        box-shadow: 0 0 12px rgba(51,214,255,0.3);
+    }
+    .custom-input-row { display: flex; gap: 6px; margin-top: 8px; }
+    .custom-input-row .form-input {
+        flex: 1; padding: 10px 14px; font-size: 14px; font-weight: 700;
+        font-family: var(--font-mono); text-align: center;
+    }
+    .custom-add-btn {
+        padding: 0 14px; background: rgba(51,214,255,0.1);
+        border: 1.5px solid rgba(51,214,255,0.35);
+        border-radius: var(--radius-sm); color: var(--neon-primary);
+        font-size: 13px; font-weight: 700;
+        transition: all 0.25s ease;
+    }
+    .custom-add-btn:active {
+        background: rgba(51,214,255,0.2); transform: scale(0.94);
+    }
+    .step-info {
+        font-size: 11px; color: var(--text-muted); margin-top: 10px;
+        padding: 8px 12px; background: rgba(51,214,255,0.04);
+        border-radius: 8px; line-height: 1.5;
+    }
+    .step-info strong {
+        color: var(--neon-primary); font-weight: 700; font-family: var(--font-mono);
+    }
+    .btn-row { display: flex; gap: 10px; margin-top: 18px; }
+    .btn {
+        flex: 1; padding: 14px; border-radius: var(--radius-sm);
+        font-size: 14px; font-weight: 700;
+        transition: all 0.2s ease;
+        position: relative; overflow: hidden;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary {
+        background: var(--neon-primary); color: #0a0a0f;
+        box-shadow: 0 0 20px rgba(51,214,255,0.4);
+    }
+    .btn-outline {
+        background: transparent; border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }
+    .btn-danger { background: var(--neon-red); color: #fff; box-shadow: 0 0 20px rgba(255,51,119,0.4); }
+
+    /* ============ QUICK ADD SHEET ============ */
+    .quick-sheet {
+        width: 100%; max-width: 420px; background: var(--bg-secondary);
+        border-radius: 24px 24px 0 0; padding: 12px 20px 26px;
+        transform: translateY(100%);
+        transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        will-change: transform;
+    }
+    .modal-overlay.open .quick-sheet { transform: translateY(0); }
+    .modal-overlay.closing .quick-sheet {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 1, 1);
+        transform: translateY(100%);
+    }
+    .quick-title {
+        font-size: 17px; font-weight: 700; text-align: center;
+        margin-bottom: 4px;
+    }
+    .quick-progress {
+        font-size: 12px; color: var(--text-muted);
+        text-align: center; margin-bottom: 20px;
+        font-family: var(--font-mono);
+    }
+    .quick-progress .num { color: var(--neon-primary); font-weight: 700; }
+    .quick-chips {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 8px; margin-bottom: 16px;
+    }
+    .quick-chip {
+        padding: 14px 6px; border-radius: var(--radius-sm);
+        background: var(--bg-input); border: 1.5px solid var(--border-color);
+        color: var(--text-primary); font-size: 14px; font-weight: 800;
+        font-family: var(--font-mono); text-align: center;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative; overflow: hidden;
+    }
+    .quick-chip:active {
+        transform: scale(0.9);
+        background: var(--quick-color-soft, rgba(51,214,255,0.2));
+        border-color: var(--quick-color, var(--neon-primary));
+        color: var(--quick-color, var(--neon-primary));
+    }
+    .quick-chip.chosen {
+        background: var(--quick-color-soft, rgba(51,214,255,0.2));
+        border-color: var(--quick-color, var(--neon-primary));
+        color: var(--quick-color, var(--neon-primary));
+        transform: scale(1.05);
+        box-shadow: 0 0 16px var(--quick-color-soft, rgba(51,214,255,0.3));
+    }
+    .quick-chip.custom {
+        grid-column: span 3;
+        background: transparent;
+        border-style: dashed;
+        color: var(--text-secondary);
+        font-size: 13px;
+    }
+    .quick-chip.custom.chosen {
+        background: var(--quick-color-soft, rgba(51,214,255,0.2));
+        color: var(--quick-color, var(--neon-primary));
+        border-style: solid;
+    }
+    .quick-custom-row {
+        display: none; gap: 6px; margin-bottom: 16px;
+        animation: fadeUp 0.35s ease both;
+    }
+    .quick-custom-row.show { display: flex; }
+    .quick-custom-row input {
+        flex: 1; padding: 12px 14px; background: var(--bg-input);
+        border: 1.5px solid var(--border-color); border-radius: var(--radius-sm);
+        color: var(--text-primary); font-size: 16px; font-weight: 700;
+        font-family: var(--font-mono); outline: none; text-align: center;
+        transition: all 0.25s;
+    }
+    .quick-custom-row input:focus {
+        border-color: var(--neon-primary);
+        box-shadow: 0 0 0 3px rgba(51,214,255,0.15);
+    }
+    .quick-custom-row .unit-lbl {
+        display: flex; align-items: center; padding: 0 12px;
+        color: var(--text-muted); font-size: 13px; font-weight: 700;
+    }
+
+    /* ============ CONFIRM ============ */
+    .confirm-modal {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.75); z-index: 250;
+        display: none; align-items: center; justify-content: center;
+        padding: 20px; opacity: 0; transition: opacity 0.3s;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+    .confirm-modal.open { display: flex; opacity: 1; }
+    .confirm-box {
+        width: 100%; max-width: 320px; background: var(--bg-secondary);
+        border: 1px solid var(--border-color); border-radius: 20px;
+        padding: 22px 20px 16px; text-align: center;
+        transform: scale(0.85); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .confirm-modal.open .confirm-box { transform: scale(1); }
+    .confirm-icon {
+        width: 56px; height: 56px; border-radius: 50%;
+        background: rgba(255,51,119,0.1);
+        border: 1px solid rgba(255,51,119,0.3);
+        color: var(--neon-red); display: flex;
+        align-items: center; justify-content: center;
+        margin: 0 auto 14px;
+        animation: confirmIconPulse 2s ease-in-out infinite;
+    }
+    @keyframes confirmIconPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255,51,119,0.4); }
+        50%      { box-shadow: 0 0 0 10px rgba(255,51,119,0); }
+    }
+    .confirm-icon svg {
+        width: 26px; height: 26px; stroke: currentColor; fill: none;
+        stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .confirm-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .confirm-text {
+        font-size: 13px; color: var(--text-secondary);
+        margin-bottom: 18px; line-height: 1.4;
+    }
+    .confirm-btns { display: flex; gap: 8px; }
+    .confirm-btns .btn { padding: 12px; }
+
+    /* ============ TOAST ============ */
+    .toast {
+        position: absolute; bottom: 90px; left: 50%;
+        transform: translateX(-50%) translateY(30px);
+        background: var(--bg-secondary); border: 1px solid var(--border-color);
+        padding: 12px 18px; border-radius: var(--radius-sm);
+        font-size: 13px; font-weight: 600; opacity: 0;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 300; pointer-events: none; max-width: 90%;
+        display: flex; align-items: center; gap: 8px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast svg {
+        width: 16px; height: 16px; stroke: var(--neon-green); fill: none;
+        stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+    }
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+    <div class="splash-inner">
+        <div class="splash-logo">KRL</div>
+        <div class="splash-sub">привычки</div>
+        <div class="splash-loader"></div>
+    </div>
+</div>
+
+<div class="phone">
+
+    <!-- ============ TELEGRAM HEADER ============ -->
+    <div class="tg-header" id="tgHeader">
+        <button class="tg-close-btn" id="tgCloseBtn" type="button">
+            <svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+            <span>Закрыть</span>
+        </button>
+        <div class="tg-title">KRL Habits</div>
+        <button class="tg-menu-btn" id="tgMenuBtn" type="button" aria-label="Меню">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+    </div>
+
+    <!-- ONBOARDING -->
+    <div class="onboard" id="onboard">
+        <div class="onboard-track" id="onboardTrack">
+            <div class="onboard-step">
+                <div class="onboard-logo">KRL</div>
+                <div class="onboard-logo-sub">привычки</div>
+                <div class="onboard-title">
+                    Привет!<br>Как тебя <span class="accent">звать</span>?
+                </div>
+                <div class="onboard-sub">
+                    Введи имя — будем обращаться лично. Потом можно поменять в профиле.
+                </div>
+                <input class="onboard-input" id="onbName" type="text" placeholder="Например: Кирилл" maxlength="20" autocomplete="off">
+                <button class="onboard-btn" id="onbBtn1" type="button">Продолжить</button>
+                <div class="onboard-progress">
+                    <div class="onboard-progress-dot active"></div>
+                    <div class="onboard-progress-dot"></div>
+                    <div class="onboard-progress-dot"></div>
+                </div>
+            </div>
+
+            <div class="onboard-step">
+                <div class="onboard-logo" style="font-size:32px; margin-bottom:24px;">KRL</div>
+                <div class="onboard-title" style="font-size:24px;">
+                    Кто ты <span class="accent">по жизни</span>?
+                </div>
+                <div class="onboard-sub">
+                    Выбери шаблон — я подберу стартовый набор привычек. Потом сможешь всё поменять.
+                </div>
+                <div class="onboard-templates">
+                    <button class="onboard-template" data-template="normal" style="--tpl-color: #33D6FF;" type="button">
+                        <div class="onboard-tpl-icon blue">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 014-4h8a4 4 0 014 4v2"/></svg>
+                        </div>
+                        <div class="onboard-tpl-info">
+                            <div class="onboard-tpl-name">Обычный человек</div>
+                            <div class="onboard-tpl-desc">Вода · Чтение · Сон · Дневник</div>
+                        </div>
+                    </button>
+                    <button class="onboard-template" data-template="sport" style="--tpl-color: #00ffaa;" type="button">
+                        <div class="onboard-tpl-icon green">
+                            <svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11"/><rect x="2" y="9" width="4" height="6" rx="1"/><rect x="18" y="9" width="4" height="6" rx="1"/><rect x="7" y="10" width="10" height="4" rx="1"/></svg>
+                        </div>
+                        <div class="onboard-tpl-info">
+                            <div class="onboard-tpl-name">Спортсмен</div>
+                            <div class="onboard-tpl-desc">Тренировка · Вода · Растяжка · Сон</div>
+                        </div>
+                    </button>
+                    <button class="onboard-template" data-template="freelancer" style="--tpl-color: #aa66ff;" type="button">
+                        <div class="onboard-tpl-icon purple">
+                            <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="18" cy="14" r="1.5"/></svg>
+                        </div>
+                        <div class="onboard-tpl-info">
+                            <div class="onboard-tpl-name">Фрилансер</div>
+                            <div class="onboard-tpl-desc">Работа · Обучение · Спорт · Дневник</div>
+                        </div>
+                    </button>
+                </div>
+                <button class="onboard-btn" id="onbBtn2" type="button">Начать</button>
+                <button class="onboard-skip" id="onbSkip2" type="button">Пропустить, я сам выберу</button>
+                <div class="onboard-progress">
+                    <div class="onboard-progress-dot"></div>
+                    <div class="onboard-progress-dot active"></div>
+                    <div class="onboard-progress-dot"></div>
+                </div>
+            </div>
+
+            <div class="onboard-step">
+                <div class="onboard-success">
+                    <div class="onboard-success-icon">
+                        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="onboard-success-title" id="onbSuccessTitle">Всё готово!</div>
+                    <div class="onboard-success-text" id="onbSuccessText">
+                        Привычки добавлены. Начни свой первый день — жми «Начать».
+                    </div>
+                </div>
+                <button class="onboard-btn" id="onbBtn3" type="button">Начать</button>
+                <div class="onboard-progress">
+                    <div class="onboard-progress-dot"></div>
+                    <div class="onboard-progress-dot"></div>
+                    <div class="onboard-progress-dot active"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 1 -->
+    <div class="screen active" id="screenToday">
+        <header class="h-top">
+            <div class="h-brand">
+                <div class="h-brand-logo">KRL</div>
+                <div class="h-brand-sub">привычки</div>
+            </div>
+            <div class="streak-header" id="streakHeader">
+                <span class="streak-header-icon">
+                    <svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>
+                </span>
+                <span class="streak-header-value" id="streakValue">0</span>
+                <span class="streak-header-label">дней</span>
+            </div>
+        </header>
+
+        <section class="greeting">
+            <div class="greeting-text">
+                <div class="greeting-hi" id="greetHi">Привет</div>
+                <div class="greeting-date" id="greetDate">Сегодня</div>
+            </div>
+            <div class="energy-ring" id="energyRingWrap">
+                <svg viewBox="0 0 60 60">
+                    <circle class="bg" cx="30" cy="30" r="28"/>
+                    <circle class="fg" id="energyRing" cx="30" cy="30" r="28"/>
+                </svg>
+                <div class="energy-ring-value">
+                    <span class="num" id="energyNum">0%</span>
+                    <span class="lbl">энергия</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="day-progress">
+            <div class="day-progress-fill" id="dayProgressFill"></div>
+        </div>
+
+        <div class="day-hint">
+            <span id="dayHint">Осталось <strong>0 из 0</strong></span>
+            <span id="dayPercent">0%</span>
+        </div>
+
+        <section class="days-strip">
+            <div class="days-strip-header">
+                <span class="days-strip-title">Эта неделя</span>
+                <span class="days-strip-range" id="weekRange">0 / 0</span>
+            </div>
+            <div class="days-strip-line" id="daysStripLine"></div>
+        </section>
+
+        <div class="section-title"><span>Все привычки</span></div>
+        <div id="todayHabitsContainer"></div>
+    </div>
+
+    <!-- SCREEN 2 -->
+    <div class="screen" id="screenHabits">
+        <header class="h-top">
+            <div class="h-brand">
+                <div class="h-brand-logo">KRL</div>
+                <div class="h-brand-sub">привычки</div>
+            </div>
+        </header>
+        <section class="greeting">
+            <div class="greeting-text">
+                <div class="greeting-hi" style="font-size:19px;">Мои привычки</div>
+                <div class="greeting-date" id="habitsCount">0 активные</div>
+            </div>
+        </section>
+        <button class="add-btn" id="openCreateHabit" type="button">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            Добавить привычку
+        </button>
+        <div id="habitsList"></div>
+        <div style="text-align:center;font-size:11px;color:var(--text-muted);padding:10px 0 20px;">
+            Свайп влево — удалить · Долгое нажатие — быстрые действия
+        </div>
+    </div>
+
+    <!-- SCREEN 3 -->
+    <div class="screen" id="screenStats">
+        <header class="h-top">
+            <div class="h-brand">
+                <div class="h-brand-logo">KRL</div>
+                <div class="h-brand-sub">статистика</div>
+            </div>
+        </header>
+        <section class="greeting">
+            <div class="greeting-text">
+                <div class="greeting-hi" style="font-size:19px;">Обзор</div>
+                <div class="greeting-date">За всё время</div>
+            </div>
+        </section>
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-box-label">Макс стрик</div>
+                <div class="stat-box-value yellow" id="statMaxStreak">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-label">Привычек</div>
+                <div class="stat-box-value cyan" id="statTotal">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-label">Выполнено сегодня</div>
+                <div class="stat-box-value purple" id="statDone">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-label">Энергия дня</div>
+                <div class="stat-box-value green" id="statEnergy">0%</div>
+            </div>
+        </div>
+        <div class="section-title">Активность за год</div>
+        <div class="heatmap-wrap">
+            <div class="heatmap" id="heatmap"></div>
+        </div>
+    </div>
+
+    <!-- SCREEN 4 -->
+    <div class="screen" id="screenProfile">
+        <header class="h-top">
+            <div class="h-brand"><div class="h-brand-logo">KRL</div></div>
+        </header>
+        <div class="profile-header">
+            <div class="profile-avatar" id="avatarLetter">К</div>
+            <div>
+                <div class="profile-name" id="profileName">Друг</div>
+                <div class="profile-sub" id="profileSub">Со мной с сегодня</div>
+            </div>
+        </div>
+        <div class="settings-list">
+            <div class="settings-item" id="editNameItem">
+                <div class="settings-left">
+                    <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <span class="settings-label">Имя</span>
+                </div>
+                <span class="settings-value" id="settingsName">Друг</span>
+                <span class="settings-arrow">›</span>
+            </div>
+            <div class="settings-item danger" id="resetItem">
+                <div class="settings-left">
+                    <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    <span class="settings-label">Сбросить все данные</span>
+                </div>
+                <span class="settings-arrow" style="color:var(--neon-red);">›</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" data-screen="screenToday" type="button">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            <span class="nav-label">Сегодня</span>
+        </button>
+        <button class="nav-btn" data-screen="screenHabits" type="button">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            <span class="nav-label">Привычки</span>
+        </button>
+        <button class="nav-btn" data-screen="screenStats" type="button">
+            <svg viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="6" y="10" width="3" height="8"/><rect x="11" y="6" width="3" height="12"/><rect x="16" y="13" width="3" height="5"/></svg>
+            <span class="nav-label">Статистика</span>
+        </button>
+        <button class="nav-btn" data-screen="screenProfile" type="button">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 014-4h8a4 4 0 014 4v2"/></svg>
+            <span class="nav-label">Профиль</span>
+        </button>
+    </nav>
+
+    <!-- QUICK ADD SHEET -->
+    <div class="modal-overlay" id="quickModal">
+        <div class="quick-sheet" id="quickSheet">
+            <div class="sheet-handle"></div>
+            <div class="quick-title" id="quickTitle">Пить воду</div>
+            <div class="quick-progress" id="quickProgress">
+                Сегодня: <span class="num">0</span> / 2000 мл
+            </div>
+            <div class="quick-chips" id="quickChips"></div>
+            <div class="quick-custom-row" id="quickCustomRow">
+                <input type="number" id="quickCustomInput" placeholder="Своё число" min="0.01" step="any">
+                <span class="unit-lbl" id="quickCustomUnit">мл</span>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-outline" id="quickCancel" type="button">Отмена</button>
+                <button class="btn btn-primary" id="quickSubmit" type="button">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE MODAL -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Новая привычка</div>
+
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input class="form-input" id="newHabitName" type="text" placeholder="Например: Пить воду" maxlength="40">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Иконка</label>
+                <div class="icon-grid" id="iconGrid">
+                    <button class="icon-opt selected" data-icon="droplet" type="button"><svg viewBox="0 0 24 24"><path d="M12 2.5s7 7.5 7 12a7 7 0 11-14 0c0-4.5 7-12 7-12z"/></svg></button>
+                    <button class="icon-opt" data-icon="run" type="button"><svg viewBox="0 0 24 24"><circle cx="16" cy="5" r="2"/><path d="M5 21l3-5 3 2 2-6 4 3 3-3"/><path d="M11 12L8 7l5-2 2 4"/></svg></button>
+                    <button class="icon-opt" data-icon="book" type="button"><svg viewBox="0 0 24 24"><path d="M4 4h12a2 2 0 012 2v14a2 2 0 00-2-2H4z"/><path d="M4 4v16h12"/></svg></button>
+                    <button class="icon-opt" data-icon="meditate" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="3"/><path d="M12 9v6"/><path d="M6 15l6-3 6 3"/><path d="M5 21h14"/></svg></button>
+                    <button class="icon-opt" data-icon="sleep" type="button"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
+                    <button class="icon-opt" data-icon="apple" type="button"><svg viewBox="0 0 24 24"><path d="M12 6c-1.5-3-5-3-7-1s-2 6 0 9 5 4 7 3 5-3 7-6c1-2 0-4-2-4s-3 1-5-1z"/><path d="M12 6V2"/></svg></button>
+                    <button class="icon-opt" data-icon="pencil" type="button"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+                    <button class="icon-opt" data-icon="sun" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Цвет</label>
+                <div class="color-grid" id="colorGrid">
+                    <button class="color-opt" data-color="#33D6FF" style="color:#33D6FF" type="button"></button>
+                    <button class="color-opt selected" data-color="#00ffaa" style="color:#00ffaa" type="button"></button>
+                    <button class="color-opt" data-color="#ff3377" style="color:#ff3377" type="button"></button>
+                    <button class="color-opt" data-color="#ffdd00" style="color:#ffdd00" type="button"></button>
+                    <button class="color-opt" data-color="#aa66ff" style="color:#aa66ff" type="button"></button>
+                    <button class="color-opt" data-color="#ff8844" style="color:#ff8844" type="button"></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Единица</label>
+                <div class="unit-selector" id="unitSelector">
+                    <button class="unit-opt active" data-unit="мл" type="button">мл</button>
+                    <button class="unit-opt" data-unit="л" type="button">л</button>
+                    <button class="unit-opt" data-unit="мин" type="button">мин</button>
+                    <button class="unit-opt" data-unit="раз" type="button">раз</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Цель дня</label>
+                <input class="form-input" type="number" id="newHabitTarget" placeholder="2000" min="1" value="2000" style="font-weight:700; font-family:var(--font-mono); text-align:center; font-size:18px;">
+                <div class="target-chips" id="targetChips">
+                    <button class="target-chip" data-val="1000" type="button">1000</button>
+                    <button class="target-chip" data-val="1500" type="button">1500</button>
+                    <button class="target-chip selected" data-val="2000" type="button">2000</button>
+                    <button class="target-chip" data-val="2500" type="button">2500</button>
+                    <button class="target-chip" data-val="3000" type="button">3000</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Сколько за раз</label>
+                <div class="target-chips" id="stepChips">
+                    <button class="target-chip" data-val="50" type="button">50</button>
+                    <button class="target-chip" data-val="100" type="button">100</button>
+                    <button class="target-chip selected" data-val="200" type="button">200</button>
+                    <button class="target-chip" data-val="250" type="button">250</button>
+                    <button class="target-chip" data-val="300" type="button">300</button>
+                    <button class="target-chip" data-val="350" type="button">350</button>
+                </div>
+                <div class="custom-input-row">
+                    <input class="form-input" type="number" id="customStep" placeholder="Своё число" min="1">
+                    <button class="custom-add-btn" id="customStepBtn" type="button">OK</button>
+                </div>
+            </div>
+
+            <div class="step-info" id="stepInfo">
+                Понадобится <strong>10</strong> тапов чтобы выполнить всю норму
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-outline" id="cancelCreate" type="button">Отмена</button>
+                <button class="btn btn-primary" id="submitCreate" type="button">Создать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAME MODAL -->
+    <div class="modal-overlay" id="nameModal">
+        <div class="modal-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Твоё имя</div>
+            <div class="form-group">
+                <label class="form-label">Как тебя звать?</label>
+                <input class="form-input" id="nameInput" type="text" placeholder="Например: Кирилл" maxlength="20">
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-outline" id="cancelName" type="button">Отмена</button>
+                <button class="btn btn-primary" id="submitName" type="button">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRM -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-box">
+            <div class="confirm-icon">
+                <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            </div>
+            <div class="confirm-title">Удалить привычку?</div>
+            <div class="confirm-text" id="confirmText">Это действие нельзя отменить.</div>
+            <div class="confirm-btns">
+                <button class="btn btn-outline" id="confirmCancel" type="button">Отмена</button>
+                <button class="btn btn-danger" id="confirmOk" type="button">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="toastText">Готово</span>
+    </div>
+
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ============================================================
+    //  TELEGRAM WEB APP
+    // ============================================================
+    var tg = window.Telegram && window.Telegram.WebApp;
+    if (tg && tg.initData) {
+        try {
+            document.body.classList.add('tg-mode');
+            tg.ready();
+            tg.expand();
+            if (tg.setHeaderColor) tg.setHeaderColor('#0a0a0f');
+            if (tg.setBackgroundColor) tg.setBackgroundColor('#0a0a0f');
+            if (tg.enableClosingConfirmation) tg.enableClosingConfirmation();
+        } catch (e) {}
+    }
+
+    // ============ HELPERS ============
+    function $(sel, root) { return (root || document).querySelector(sel); }
+    function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+    function haptic(ms) {
+        ms = ms || 15;
+        if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} }
+    }
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function(m) {
+            return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m];
+        });
+    }
+    function hexToRgba(hex, alpha) {
+        var h = hex.replace('#','');
+        var r = parseInt(h.substring(0,2), 16);
+        var g = parseInt(h.substring(2,4), 16);
+        var b = parseInt(h.substring(4,6), 16);
+        return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+    }
+    function formatNumber(n) {
+        if (Number.isInteger(n)) return String(n);
+        return n.toFixed(2).replace(/\.?0+$/, '');
+    }
+    function plural(n, forms) {
+        var mod10 = n % 10, mod100 = n % 100;
+        if (mod10 === 1 && mod100 !== 11) return forms[0];
+        if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return forms[1];
+        return forms[2];
+    }
+    function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
+    var ICON_SVG = {
+        droplet: '<path d="M12 2.5s7 7.5 7 12a7 7 0 11-14 0c0-4.5 7-12 7-12z"/>',
+        run: '<circle cx="16" cy="5" r="2"/><path d="M5 21l3-5 3 2 2-6 4 3 3-3"/><path d="M11 12L8 7l5-2 2 4"/>',
+        book: '<path d="M4 4h12a2 2 0 012 2v14a2 2 0 00-2-2H4z"/><path d="M4 4v16h12"/>',
+        meditate: '<circle cx="12" cy="6" r="3"/><path d="M12 9v6"/><path d="M6 15l6-3 6 3"/><path d="M5 21h14"/>',
+        sleep: '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>',
+        apple: '<path d="M12 6c-1.5-3-5-3-7-1s-2 6 0 9 5 4 7 3 5-3 7-6c1-2 0-4-2-4s-3 1-5-1z"/><path d="M12 6V2"/>',
+        pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>',
+        sun: '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'
+    };
+
+    var STREAK_ICON = '<svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>';
+
+    // ============ STATE ============
+    var STORAGE_KEY = 'krl_habits_v6';
+
+    function getEmptyState() {
+        return {
+            onboarded: false, userName: '', userStreak: 0,
+            startedAt: null, habits: [], history: {},
+            customSteps: {
+                'мл':  [50, 100, 200, 250, 300, 350],
+                'л':   [0.25, 0.5, 1],
+                'мин': [5, 10, 15, 20, 30],
+                'раз': [1, 2, 3, 5]
+            }
+        };
+    }
+    var appState = getEmptyState();
+
+    function saveState() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+    }
+    function loadState() {
+        try {
+            var raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+            var parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return;
+            var empty = getEmptyState();
+            for (var k in empty) { if (!(k in parsed)) parsed[k] = empty[k]; }
+            if (!Array.isArray(parsed.habits)) parsed.habits = [];
+            if (!parsed.history || typeof parsed.history !== 'object' || Array.isArray(parsed.history)) parsed.history = {};
+            if (!parsed.customSteps || typeof parsed.customSteps !== 'object') parsed.customSteps = empty.customSteps;
+            appState = parsed;
+            appState.habits = appState.habits.map(function(h) {
+                return {
+                    id: h.id || 'h_' + Math.random().toString(36).slice(2),
+                    name: h.name || 'Привычка',
+                    icon: h.icon || 'droplet',
+                    color: h.color || '#33D6FF',
+                    target: h.target || 1,
+                    unit: h.unit || 'раз',
+                    step: h.step || 1,
+                    current: typeof h.current === 'number' ? h.current : 0,
+                    streak: h.streak || 0,
+                    lastCheckDate: h.lastCheckDate || null,
+                    lastStreakDate: h.lastStreakDate || null
+                };
+            });
+        } catch (e) {}
+    }
+    loadState();
+
+    // ============ DATES ============
+    var MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+    var WEEKDAYS = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+    function dateKey(d) { d = d || new Date(); return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate(); }
+    function todayKey() { return dateKey(new Date()); }
+    function yesterdayKey() { var d = new Date(); d.setDate(d.getDate() - 1); return dateKey(d); }
+
+    // ============ STREAK ============
+    function getStreakLevel(days) {
+        if (days >= 365) return { color: '#ff66ff', glow: 'rgba(255,102,255,0.6)', rainbow: true };
+        if (days >= 100) return { color: '#00ffaa', glow: 'rgba(0,255,170,0.6)' };
+        if (days >= 60)  return { color: '#aa66ff', glow: 'rgba(170,102,255,0.6)' };
+        if (days >= 30)  return { color: '#4488ff', glow: 'rgba(68,136,255,0.6)' };
+        if (days >= 15)  return { color: '#ff5522', glow: 'rgba(255,85,34,0.6)' };
+        if (days >= 7)   return { color: '#ffdd00', glow: 'rgba(255,221,0,0.6)' };
+        if (days >= 1)   return { color: '#ff8844', glow: 'rgba(255,136,68,0.5)' };
+        return { color: '#555577', glow: 'rgba(85,85,119,0.3)' };
+    }
+    function applyStreakStyle(el, days) {
+        if (!el) return;
+        var lvl = getStreakLevel(days);
+        el.style.setProperty('--streak-color', lvl.color);
+        el.style.setProperty('--streak-glow', lvl.glow);
+        el.classList.remove('pulse', 'rainbow');
+        if (lvl.rainbow) el.classList.add('rainbow');
+        else if (days >= 30) el.classList.add('pulse');
+    }
+
+    // ============ HISTORY & STREAK RECALC ============
+    function recordToday() {
+        var total = appState.habits.length;
+        if (total === 0) return;
+        var done = appState.habits.filter(function(h) { return h.current >= h.target; }).length;
+        var key = todayKey();
+        if (!appState.history[key]) appState.history[key] = {};
+        appState.history[key] = { done: done, total: total };
+        var keys = Object.keys(appState.history);
+        if (keys.length > 400) {
+            keys.sort();
+            keys.slice(0, keys.length - 400).forEach(function(k) { delete appState.history[k]; });
+        }
+    }
+    function isDayFull(key) {
+        var rec = appState.history[key];
+        return !!rec && rec.total > 0 && rec.done >= rec.total;
+    }
+    function recalcUserStreak() {
+        var streak = 0;
+        var d = new Date();
+        if (isDayFull(dateKey(d))) {
+            while (isDayFull(dateKey(d))) { streak++; d.setDate(d.getDate() - 1); }
+        } else {
+            d.setDate(d.getDate() - 1);
+            while (isDayFull(dateKey(d))) { streak++; d.setDate(d.getDate() - 1); }
+        }
+        appState.userStreak = streak;
+    }
+    function recalcHabitStreaks() {
+        var yKey = yesterdayKey(), tKey = todayKey();
+        appState.habits.forEach(function(h) {
+            if (h.lastStreakDate !== tKey && h.lastStreakDate !== yKey) h.streak = 0;
+        });
+    }
+
+    // ============ CHECK DAY ============
+    function checkDayChange() {
+        var today = todayKey(), changed = false;
+        appState.habits.forEach(function(h) {
+            if (h.lastCheckDate && h.lastCheckDate !== today) {
+                h.current = 0; h.lastCheckDate = null; changed = true;
+            }
+        });
+        if (changed) { recalcHabitStreaks(); recalcUserStreak(); saveState(); }
+        return changed;
+    }
+
+    // ============ TOAST ============
+    var toastTimer = null;
+    function showToast(text) {
+        var toast = $('#toast'), textEl = $('#toastText');
+        if (!toast || !textEl) return;
+        textEl.textContent = text;
+        toast.classList.remove('show');
+        void toast.offsetWidth;
+        toast.classList.add('show');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function() { toast.classList.remove('show'); }, 2200);
+    }
+
+    // ============ CONFIRM ============
+    var confirmCallback = null;
+    function openConfirm(text, onOk) {
+        var modal = $('#confirmModal'), textEl = $('#confirmText');
+        if (!modal || !textEl) return;
+        textEl.textContent = text;
+        confirmCallback = onOk;
+        modal.classList.add('open');
+    }
+    function closeConfirm() {
+        var m = $('#confirmModal');
+        if (m) m.classList.remove('open');
+        confirmCallback = null;
+    }
+    var confirmCancelEl = $('#confirmCancel');
+    if (confirmCancelEl) confirmCancelEl.addEventListener('click', closeConfirm);
+    var confirmOkEl = $('#confirmOk');
+    if (confirmOkEl) confirmOkEl.addEventListener('click', function() {
+        if (confirmCallback) confirmCallback();
+        closeConfirm();
+    });
+    var confirmModalEl = $('#confirmModal');
+    if (confirmModalEl) confirmModalEl.addEventListener('click', function(e) {
+        if (e.target === confirmModalEl) closeConfirm();
+    });
+
+    // ============ CLOCK ============
+    function updateClock() {
+        var now = new Date();
+        var greetHi = $('#greetHi'), greetDate = $('#greetDate');
+        if (greetHi) {
+            var h = now.getHours(), text;
+            if (h >= 5 && h < 12) text = 'Доброе утро';
+            else if (h >= 12 && h < 18) text = 'Добрый день';
+            else if (h >= 18 && h < 23) text = 'Добрый вечер';
+            else text = 'Поздновато';
+            greetHi.textContent = text + ', ' + (appState.userName || 'друг');
+        }
+        if (greetDate) {
+            greetDate.textContent = WEEKDAYS[now.getDay()] + ', ' + now.getDate() + ' ' + MONTHS[now.getMonth()];
+        }
+    }
+
+    // ============ ONBOARD ============
+    var onboard = $('#onboard'), onboardTrack = $('#onboardTrack'), selectedTemplate = null;
+    function setOnboardStep(n) {
+        var offset = -(n - 1) * 100;
+        if (onboardTrack) onboardTrack.style.transform = 'translateX(' + offset + '%)';
+        $$('.onboard-progress-dot').forEach(function(dot, i) { dot.classList.toggle('active', i === n - 1); });
+    }
+    function showOnboard() { if (onboard) { onboard.classList.add('active'); setOnboardStep(1); } }
+    function hideOnboard() { if (onboard) onboard.classList.remove('active'); }
+    if (!appState.onboarded) showOnboard(); else hideOnboard();
+
+    var onbBtn1 = $('#onbBtn1');
+    if (onbBtn1) onbBtn1.addEventListener('click', function() {
+        var nameInput = $('#onbName');
+        var name = nameInput ? nameInput.value.trim() : '';
+        if (!name) {
+            if (nameInput) {
+                nameInput.classList.add('shake');
+                setTimeout(function() { nameInput.classList.remove('shake'); }, 500);
+                nameInput.focus();
+            }
+            haptic(20); return;
+        }
+        appState.userName = name; saveState();
+        setOnboardStep(2); haptic(15);
+    });
+    var onbNameEl = $('#onbName');
+    if (onbNameEl) onbNameEl.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && onbBtn1) onbBtn1.click();
+    });
+
+    $$('.onboard-template').forEach(function(tpl) {
+        tpl.addEventListener('click', function() {
+            $$('.onboard-template').forEach(function(t) { t.classList.remove('selected'); });
+            tpl.classList.add('selected');
+            selectedTemplate = tpl.getAttribute('data-template');
+            haptic(10);
+        });
+    });
+
+    var onbBtn2 = $('#onbBtn2');
+    if (onbBtn2) onbBtn2.addEventListener('click', function() {
+        if (!selectedTemplate) { showToast('Выбери шаблон'); haptic(20); return; }
+        applyTemplate(selectedTemplate); updateSuccessScreen();
+        setOnboardStep(3); haptic(15);
+    });
+    var onbSkip2 = $('#onbSkip2');
+    if (onbSkip2) onbSkip2.addEventListener('click', function() {
+        applyTemplate('normal'); updateSuccessScreen();
+        setOnboardStep(3); haptic(15);
+    });
+    var onbBtn3 = $('#onbBtn3');
+    if (onbBtn3) onbBtn3.addEventListener('click', function() {
+        appState.onboarded = true;
+        if (!appState.startedAt) appState.startedAt = Date.now();
+        saveState(); hideOnboard(); renderAll();
+        showToast('Добро пожаловать в KRL'); haptic(25);
+    });
+
+    var TEMPLATES = {
+        normal: [
+            { name: 'Пить воду', icon: 'droplet', color: '#33D6FF', target: 2000, unit: 'мл', step: 200 },
+            { name: 'Чтение', icon: 'book', color: '#00ffaa', target: 30, unit: 'мин', step: 10 },
+            { name: 'Сон', icon: 'sleep', color: '#aa66ff', target: 8, unit: 'раз', step: 1 },
+            { name: 'Дневник', icon: 'pencil', color: '#ff8844', target: 15, unit: 'мин', step: 5 }
+        ],
+        sport: [
+            { name: 'Тренировка', icon: 'run', color: '#ff3377', target: 60, unit: 'мин', step: 15 },
+            { name: 'Пить воду', icon: 'droplet', color: '#33D6FF', target: 2500, unit: 'мл', step: 250 },
+            { name: 'Растяжка', icon: 'meditate', color: '#00ffaa', target: 15, unit: 'мин', step: 5 },
+            { name: 'Сон', icon: 'sleep', color: '#aa66ff', target: 8, unit: 'раз', step: 1 }
+        ],
+        freelancer: [
+            { name: 'Работа', icon: 'pencil', color: '#aa66ff', target: 4, unit: 'раз', step: 1 },
+            { name: 'Обучение', icon: 'book', color: '#33D6FF', target: 60, unit: 'мин', step: 15 },
+            { name: 'Спорт', icon: 'run', color: '#ff3377', target: 30, unit: 'мин', step: 10 },
+            { name: 'Дневник', icon: 'sun', color: '#ffdd00', target: 10, unit: 'мин', step: 5 }
+        ]
+    };
+    function applyTemplate(key) {
+        var tpl = TEMPLATES[key] || TEMPLATES.normal;
+        appState.habits = tpl.map(function(h, i) {
+            return {
+                id: 'h_' + Date.now() + '_' + i,
+                name: h.name, icon: h.icon, color: h.color,
+                target: h.target, unit: h.unit, step: h.step,
+                current: 0, streak: 0,
+                lastCheckDate: null, lastStreakDate: null
+            };
+        });
+        saveState();
+    }
+    function updateSuccessScreen() {
+        var title = $('#onbSuccessTitle'), text = $('#onbSuccessText');
+        var count = appState.habits.length;
+        if (title) title.textContent = 'Всё готово, ' + appState.userName + '!';
+        if (text) {
+            text.textContent = 'Добавлено ' + count + ' ' + plural(count, ['привычка', 'привычки', 'привычек']) + '. Жми «Начать» и отметь первую.';
+        }
+    }
+
+    // ============ NAV ============
+    var navBtns = $$('.nav-btn'), screens = $$('.screen'), currentScreen = 'screenToday';
+    navBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = btn.getAttribute('data-screen');
+            if (!id || id === currentScreen) return;
+            navBtns.forEach(function(b) { b.classList.toggle('active', b === btn); });
+            screens.forEach(function(s) { s.classList.toggle('active', s.id === id); });
+            var target = document.getElementById(id);
+            if (target) target.scrollTop = 0;
+            currentScreen = id;
+            haptic(8);
+            if (id === 'screenStats') renderStats();
+        });
+    });
+
+    // ============ ANIMATION HELPERS ============
+    function spawnRipple(card, clientX, clientY) {
+        var rect = card.getBoundingClientRect();
+        var x = (clientX != null ? clientX - rect.left : rect.width / 2);
+        var y = (clientY != null ? clientY - rect.top : rect.height / 2);
+        var size = Math.max(rect.width, rect.height) * 2;
+        var ripple = document.createElement('div');
+        ripple.className = 'ripple';
+        ripple.style.width = size + 'px';
+        ripple.style.height = size + 'px';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+        card.appendChild(ripple);
+        setTimeout(function() { if (ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 750);
+    }
+
+    function spawnSparks(card, color) {
+        var rect = card.getBoundingClientRect();
+        var centerX = rect.width / 2;
+        var centerY = rect.height / 2;
+        var count = 14;
+        for (var i = 0; i < count; i++) {
+            var spark = document.createElement('div');
+            spark.className = 'spark';
+            spark.style.background = color;
+            spark.style.boxShadow = '0 0 8px ' + color;
+            spark.style.left = centerX + 'px';
+            spark.style.top = centerY + 'px';
+            card.appendChild(spark);
+            var angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
+            var dist = 60 + Math.random() * 60;
+            var dx = Math.cos(angle) * dist;
+            var dy = Math.sin(angle) * dist;
+            (function(s, dx, dy) {
+                requestAnimationFrame(function() {
+                    s.style.transition = 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease';
+                    s.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(0.3)';
+                    s.style.opacity = '0';
+                });
+            })(spark, dx, dy);
+            (function(s) {
+                setTimeout(function() { if (s.parentNode) s.parentNode.removeChild(s); }, 1000);
+            })(spark);
+        }
+    }
+
+    function spawnDoneCheck(card, color) {
+        var check = document.createElement('div');
+        check.className = 'done-check';
+        check.innerHTML = '<div class="done-check-inner" style="--habit-color:' + color + '">' +
+            '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' +
+        '</div>';
+        card.appendChild(check);
+        requestAnimationFrame(function() { check.classList.add('show'); });
+        setTimeout(function() { if (check.parentNode) check.parentNode.removeChild(check); }, 1800);
+    }
+
+    // ============ QUICK ADD SHEET ============
+    var quickModal = $('#quickModal');
+    var quickState = {
+        habit: null,
+        card: null,
+        chosenValue: null,
+        isCustom: false
+    };
+
+    function openQuickAdd(habit, card) {
+        if (!quickModal) return;
+        quickState.habit = habit;
+        quickState.card = card;
+        quickState.chosenValue = null;
+        quickState.isCustom = false;
+
+        var title = $('#quickTitle');
+        var prog = $('#quickProgress');
+        var chips = $('#quickChips');
+        var customRow = $('#quickCustomRow');
+        var customInput = $('#quickCustomInput');
+        var customUnit = $('#quickCustomUnit');
+
+        if (title) title.textContent = habit.name;
+        if (prog) {
+            prog.innerHTML = 'Сегодня: <span class="num">' + formatNumber(habit.current) + '</span> / ' +
+                formatNumber(habit.target) + ' ' + habit.unit;
+        }
+
+        if (quickModal) {
+            quickModal.style.setProperty('--quick-color', habit.color);
+            quickModal.style.setProperty('--quick-color-soft', hexToRgba(habit.color, 0.18));
+        }
+
+        var presets = (appState.customSteps[habit.unit] || [habit.step]).slice();
+        if (presets.indexOf(habit.step) === -1) presets.push(habit.step);
+        presets.sort(function(a, b) { return a - b; });
+
+        var chipsHtml = '';
+        presets.forEach(function(v) {
+            var remaining = habit.target - habit.current;
+            var disabled = v > remaining ? ' style="opacity:0.4;"' : '';
+            chipsHtml += '<button class="quick-chip" data-val="' + v + '" type="button"' + disabled + '>' +
+                '+' + formatNumber(v) + '</button>';
+        });
+        chipsHtml += '<button class="quick-chip custom" data-custom="1" type="button">✎ Другое</button>';
+        if (chips) chips.innerHTML = chipsHtml;
+
+        if (customRow) customRow.classList.remove('show');
+        if (customInput) customInput.value = '';
+        if (customUnit) customUnit.textContent = habit.unit;
+
+        quickModal.classList.add('open');
+        haptic(12);
+
+        if (chips) {
+            $$('.quick-chip', chips).forEach(function(chip) {
+                chip.addEventListener('click', function() {
+                    if (chip.getAttribute('data-custom')) {
+                        quickState.isCustom = true;
+                        quickState.chosenValue = null;
+                        $$('.quick-chip', chips).forEach(function(c) { c.classList.remove('chosen'); });
+                        chip.classList.add('chosen');
+                        if (customRow) customRow.classList.add('show');
+                        setTimeout(function() { if (customInput) customInput.focus(); }, 120);
+                        haptic(10);
+                    } else {
+                        quickState.isCustom = false;
+                        quickState.chosenValue = parseFloat(chip.getAttribute('data-val'));
+                        $$('.quick-chip', chips).forEach(function(c) { c.classList.remove('chosen'); });
+                        chip.classList.add('chosen');
+                        if (customRow) customRow.classList.remove('show');
+                        haptic(12);
+                        setTimeout(function() { applyQuickAdd(); }, 180);
+                    }
+                });
+            });
+        }
+    }
+
+    function closeQuickAdd() {
+        if (!quickModal) return;
+        quickModal.classList.add('closing');
+        setTimeout(function() {
+            quickModal.classList.remove('open');
+            quickModal.classList.remove('closing');
+        }, 300);
+    }
+
+    async function applyQuickAdd() {
+        var habit = quickState.habit;
+        var card = quickState.card;
+        var value;
+
+        if (quickState.isCustom) {
+            var input = $('#quickCustomInput');
+            value = input ? parseFloat(input.value) : 0;
+            if (!value || value <= 0) {
+                showToast('Введи число');
+                haptic(20);
+                if (input) {
+                    input.classList.add('shake');
+                    setTimeout(function() { input.classList.remove('shake'); }, 500);
+                    input.focus();
+                }
+                return;
+            }
+        } else {
+            value = quickState.chosenValue;
+            if (!value) return;
+        }
+
+        closeQuickAdd();
+        haptic(20);
+
+        await sleep(320);
+
+        if (!habit || !card || !document.body.contains(card)) {
+            var wasCompleted = habit.current >= habit.target;
+            habit.current = Math.max(0, Math.min(habit.target, habit.current + value));
+            var nowCompleted = habit.current >= habit.target;
+            handleCompletionTransition(habit, wasCompleted, nowCompleted, null);
+            recordToday(); recalcUserStreak(); saveState();
+            return;
+        }
+
+        card.classList.add('drawer-close', 'locked');
+        await sleep(560);
+
+        var wasCompleted = habit.current >= habit.target;
+        habit.current = Math.max(0, Math.min(habit.target, habit.current + value));
+        var nowCompleted = habit.current >= habit.target;
+
+        card.classList.remove('drawer-close');
+        card.classList.add('drawer-open');
+        await sleep(120);
+
+        animateCardNumbers(card, habit, value);
+        await sleep(540);
+        card.classList.remove('drawer-open', 'locked');
+
+        if (!wasCompleted && nowCompleted) {
+            await playCompletionRitual(card, habit);
+        }
+
+        handleCompletionTransition(habit, wasCompleted, nowCompleted, card);
+        saveState();
+        updateSummary();
+        updateEnergy();
+        updateStreakHeader(!wasCompleted && nowCompleted);
+    }
+
+    function animateCardNumbers(card, habit, delta) {
+        var pct = Math.min(100, (habit.current / habit.target) * 100);
+        var currentEl = card.querySelector('.current');
+        var scaleFill = card.querySelector('.habit-water-scale-fill');
+        var fillLayer = card.querySelector('.fill-layer');
+        var minusBtn = card.querySelector('[data-action="minus"]');
+        var iconWrap = card.querySelector('.habit-icon-wrap');
+
+        if (currentEl) {
+            currentEl.textContent = formatNumber(habit.current);
+            currentEl.classList.remove('bump');
+            void currentEl.offsetWidth;
+            currentEl.classList.add('bump');
+        }
+        if (scaleFill) scaleFill.style.width = pct + '%';
+        if (fillLayer) fillLayer.style.width = pct + '%';
+        if (minusBtn) minusBtn.disabled = habit.current <= 0;
+        if (iconWrap && delta > 0) {
+            iconWrap.classList.remove('bounce');
+            void iconWrap.offsetWidth;
+            iconWrap.classList.add('bounce');
+        }
+    }
+
+    async function playCompletionRitual(card, habit) {
+        var fillLayer = card.querySelector('.fill-layer');
+        var nameEl = card.querySelector('.habit-name');
+        var scaleFill = card.querySelector('.habit-water-scale-fill');
+
+        var startPct = Math.max(0, ((habit.current - habit.step) / habit.target) * 100);
+        var endPct = 100;
+        if (fillLayer) {
+            fillLayer.style.transition = 'none';
+            fillLayer.style.width = startPct + '%';
+            void fillLayer.offsetWidth;
+            fillLayer.classList.add('ritual');
+            requestAnimationFrame(function() {
+                fillLayer.style.width = endPct + '%';
+            });
+        }
+        if (scaleFill) {
+            scaleFill.style.transition = 'width 3s cubic-bezier(0.4, 0, 0.2, 1)';
+            scaleFill.style.width = endPct + '%';
+        }
+
+        haptic(30);
+
+        await sleep(3050);
+
+        spawnDoneCheck(card, habit.color);
+        spawnSparks(card, habit.color);
+        if (nameEl) nameEl.classList.add('completed');
+        card.classList.add('checked');
+        haptic(40);
+
+        var badge = card.querySelector('.habit-streak-badge');
+        if (badge) {
+            badge.innerHTML = STREAK_ICON + habit.streak;
+            badge.classList.toggle('hidden', habit.streak === 0);
+            badge.classList.remove('bump');
+            void badge.offsetWidth;
+            badge.classList.add('bump');
+        }
+
+        await sleep(800);
+        if (fillLayer) fillLayer.classList.remove('ritual');
+        if (scaleFill) scaleFill.style.transition = 'width 0.5s ease';
+    }
+
+    function handleCompletionTransition(habit, wasCompleted, nowCompleted, card) {
+        if (!wasCompleted && nowCompleted) {
+            var tKey = todayKey();
+            if (habit.lastStreakDate !== tKey) {
+                var yKey = yesterdayKey();
+                if (habit.lastStreakDate && habit.lastStreakDate !== yKey) {
+                    habit.streak = 1;
+                } else {
+                    habit.streak = (habit.streak || 0) + 1;
+                }
+                habit.lastStreakDate = tKey;
+            }
+            recordToday();
+            recalcUserStreak();
+
+            if (card) {
+                var badge = card.querySelector('.habit-streak-badge');
+                if (badge) {
+                    badge.innerHTML = STREAK_ICON + habit.streak;
+                    badge.classList.toggle('hidden', habit.streak === 0);
+                }
+            }
+
+            var allDone = appState.habits.length > 0 && appState.habits.every(function(h) { return h.current >= h.target; });
+            if (allDone) {
+                showToast('Все привычки! Стрик: ' + appState.userStreak);
+                flashStreakHeader();
+            } else {
+                showToast(habit.name + ' — готово');
+            }
+        } else if (wasCompleted && !nowCompleted) {
+            recordToday();
+            recalcUserStreak();
+        } else {
+            recordToday();
+        }
+    }
+
+    function flashStreakHeader() {
+        var el = $('#streakHeader');
+        if (!el) return;
+        el.classList.remove('flash');
+        void el.offsetWidth;
+        el.classList.add('flash');
+        setTimeout(function() { el.classList.remove('flash'); }, 750);
+    }
+
+    var quickCancelBtn = $('#quickCancel');
+    if (quickCancelBtn) quickCancelBtn.addEventListener('click', closeQuickAdd);
+    var quickSubmitBtn = $('#quickSubmit');
+    if (quickSubmitBtn) quickSubmitBtn.addEventListener('click', function() {
+        if (quickState.isCustom) {
+            applyQuickAdd();
+        } else if (quickState.chosenValue) {
+            applyQuickAdd();
+        } else {
+            showToast('Выбери количество');
+            haptic(15);
+        }
+    });
+    if (quickModal) quickModal.addEventListener('click', function(e) {
+        if (e.target === quickModal) closeQuickAdd();
+    });
+    var quickCustomInput = $('#quickCustomInput');
+    if (quickCustomInput) quickCustomInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') applyQuickAdd();
+    });
+
+    // ============ HABIT CARD ============
+    function buildHabitCard(habit, index) {
+        var card = document.createElement('article');
+        card.className = 'habit-card';
+        card.setAttribute('data-habit-id', habit.id);
+        card.style.setProperty('--habit-color', habit.color);
+        card.style.animationDelay = (index * 0.06) + 's';
+
+        var iconSvg = ICON_SVG[habit.icon] || ICON_SVG.droplet;
+        var isCompleted = habit.current >= habit.target;
+        var pct = Math.min(100, (habit.current / habit.target) * 100);
+        var stepLabel = '+' + formatNumber(habit.step) + ' ' + habit.unit;
+        var streakHidden = (habit.streak || 0) === 0 ? ' hidden' : '';
+
+        card.innerHTML =
+            '<button class="habit-delete-btn" type="button" aria-label="Удалить">' +
+                '<svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>' +
+            '</button>' +
+            '<div class="fill-layer" style="width: ' + pct + '%;"></div>' +
+            '<div class="habit-content">' +
+                '<div class="habit-controls">' +
+                    '<button class="habit-step-btn plus" data-action="plus" type="button" aria-label="Добавить">' +
+                        '<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>' +
+                    '</button>' +
+                    '<button class="habit-step-btn minus" data-action="minus" type="button" aria-label="Убрать" ' + (habit.current <= 0 ? 'disabled' : '') + '>' +
+                        '<svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="habit-info">' +
+                    '<div class="habit-name ' + (isCompleted ? 'completed' : '') + '">' +
+                        escapeHtml(habit.name) +
+                        '<span class="habit-streak-badge' + streakHidden + '">' + STREAK_ICON + habit.streak + '</span>' +
+                    '</div>' +
+                    '<div class="habit-water-label">' +
+                        '<span>' + stepLabel + '</span>' +
+                        '<span><span class="current">' + formatNumber(habit.current) + '</span> / ' + formatNumber(habit.target) + ' ' + habit.unit + '</span>' +
+                    '</div>' +
+                    '<div class="habit-water-scale">' +
+                        '<div class="habit-water-scale-fill" style="width: ' + pct + '%;"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="habit-icon-wrap" style="color:' + habit.color + '; background:' + hexToRgba(habit.color, 0.08) + '; border:1px solid ' + hexToRgba(habit.color, 0.2) + ';">' +
+                    '<svg viewBox="0 0 24 24">' + iconSvg + '</svg>' +
+                '</div>' +
+            '</div>';
+
+        var pressTimer = null;
+        var longPressTriggered = false;
+
+        function startPress() {
+            longPressTriggered = false;
+            clearTimeout(pressTimer);
+            pressTimer = setTimeout(function() {
+                longPressTriggered = true;
+                card.classList.add('show-delete');
+                haptic(30);
+            }, 550);
+        }
+        function cancelPress() {
+            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+        }
+        card.addEventListener('pointerdown', startPress);
+        card.addEventListener('pointerup', cancelPress);
+        card.addEventListener('pointercancel', cancelPress);
+        card.addEventListener('pointerleave', cancelPress);
+
+        var delBtn = card.querySelector('.habit-delete-btn');
+        if (delBtn) delBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openConfirm('«' + habit.name + '» будет удалена. Это действие нельзя отменить.', function() {
+                removeHabitCard(card, habit);
+            });
+        });
+
+        var plusBtn = card.querySelector('[data-action="plus"]');
+        if (plusBtn) plusBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            quickIncrement(habit, card, +habit.step);
+        });
+
+        var minusBtn = card.querySelector('[data-action="minus"]');
+        if (minusBtn) minusBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (habit.current <= 0) {
+                minusBtn.classList.add('shake');
+                setTimeout(function() { minusBtn.classList.remove('shake'); }, 500);
+                haptic(20);
+                return;
+            }
+            quickIncrement(habit, card, -habit.step);
+        });
+
+        card.addEventListener('click', function(e) {
+            if (longPressTriggered) { longPressTriggered = false; return; }
+            if (e.target.closest('.habit-delete-btn')) return;
+            if (e.target.closest('.habit-step-btn')) return;
+            if (card.classList.contains('locked')) return;
+
+            var cx = e.clientX, cy = e.clientY;
+            if (!cx && e.touches && e.touches[0]) {
+                cx = e.touches[0].clientX; cy = e.touches[0].clientY;
+            }
+            spawnRipple(card, cx, cy);
+            haptic(12);
+
+            card.classList.add('drawer-close', 'locked');
+            setTimeout(function() {
+                card.classList.remove('drawer-close');
+                card.classList.add('drawer-open');
+                openQuickAdd(habit, card);
+                setTimeout(function() {
+                    card.classList.remove('drawer-open');
+                }, 700);
+            }, 520);
+        });
+
+        return card;
+    }
+
+    function quickIncrement(habit, card, delta) {
+        var wasCompleted = habit.current >= habit.target;
+        habit.current = Math.max(0, Math.min(habit.target, habit.current + delta));
+        var nowCompleted = habit.current >= habit.target;
+
+        if (habit.current > 0) habit.lastCheckDate = todayKey();
+        else habit.lastCheckDate = null;
+
+        animateCardNumbers(card, habit, delta);
+        card.classList.toggle('checked', nowCompleted);
+        var nameEl = card.querySelector('.habit-name');
+        if (nameEl) nameEl.classList.toggle('completed', nowCompleted);
+
+        if (!wasCompleted && nowCompleted) {
+            playCompletionRitual(card, habit);
+        }
+
+        handleCompletionTransition(habit, wasCompleted, nowCompleted, card);
+        saveState();
+        updateSummary();
+        updateEnergy();
+        updateStreakHeader(!wasCompleted && nowCompleted);
+    }
+
+    function removeHabitCard(card, habit) {
+        card.classList.add('removing');
+        haptic(20);
+        setTimeout(function() {
+            appState.habits = appState.habits.filter(function(h) { return h.id !== habit.id; });
+            recordToday(); recalcUserStreak(); saveState();
+            if (card.parentNode) card.parentNode.removeChild(card);
+            renderHabitsList(); renderDaysStrip();
+            updateSummary(); updateEnergy();
+            updateStreakHeader(false);
+            showToast('«' + habit.name + '» удалена');
+        }, 400);
+    }
+
+    function renderToday() {
+        var container = $('#todayHabitsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        if (appState.habits.length === 0) {
+            container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px;line-height:1.6;">Пока нет привычек.<br>Перейди во вкладку «Привычки» и добавь первую.</div>';
+            return;
+        }
+        appState.habits.forEach(function(habit, i) {
+            container.appendChild(buildHabitCard(habit, i));
+        });
+    }
+
+    function renderHabitsList() {
+        var listEl = $('#habitsList');
+        if (!listEl) return;
+        if (appState.habits.length === 0) {
+            listEl.innerHTML = '<div style="text-align:center;padding:30px 20px;color:var(--text-muted);font-size:13px;">Пока нет привычек</div>';
+            return;
+        }
+        var html = '';
+        appState.habits.forEach(function(h, idx) {
+            var iconSvg = ICON_SVG[h.icon] || ICON_SVG.droplet;
+            var lvl = getStreakLevel(h.streak || 0);
+            var streakHidden = (h.streak || 0) === 0 ? ' hidden' : '';
+            html += '<div class="habit-list-item" data-habit-id="' + h.id + '" style="--habit-color: ' + h.color + '; animation-delay:' + (idx * 0.05) + 's;">' +
+                '<div class="habit-list-delete">' +
+                    '<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>' +
+                '</div>' +
+                '<div class="habit-list-content">' +
+                    '<div class="habit-list-icon" style="background:' + hexToRgba(h.color, 0.06) + '; border:1px solid ' + hexToRgba(h.color, 0.25) + '; color:' + h.color + ';">' +
+                        '<svg viewBox="0 0 24 24">' + iconSvg + '</svg>' +
+                    '</div>' +
+                    '<div class="habit-list-info">' +
+                        '<div class="habit-list-name">' + escapeHtml(h.name) + '</div>' +
+                        '<div class="habit-list-schedule">' + formatNumber(h.target) + ' ' + h.unit + ' · +' + formatNumber(h.step) + ' за раз</div>' +
+                    '</div>' +
+                    '<div class="habit-list-right">' +
+                        '<span class="habit-list-streak' + streakHidden + '" style="--streak-color:' + lvl.color + '; --streak-glow:' + lvl.glow + ';">' +
+                            STREAK_ICON + h.streak +
+                        '</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        });
+        listEl.innerHTML = html;
+
+        var countEl = $('#habitsCount');
+        if (countEl) countEl.textContent = appState.habits.length + ' ' + plural(appState.habits.length, ['активная', 'активные', 'активных']);
+
+        $$('.habit-list-item', listEl).forEach(function(item) {
+            var habitId = item.getAttribute('data-habit-id');
+            var habit = appState.habits.find(function(h) { return h.id === habitId; });
+            if (!habit) return;
+
+            var startX = 0, isDragging = false;
+            item.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX; isDragging = true;
+            }, { passive: true });
+            item.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                var diff = e.touches[0].clientX - startX;
+                if (diff < -25) item.classList.add('swiped');
+                else if (diff > 20) item.classList.remove('swiped');
+            }, { passive: true });
+            item.addEventListener('touchend', function() { isDragging = false; }, { passive: true });
+
+            var delZone = item.querySelector('.habit-list-delete');
+            if (delZone) delZone.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openConfirm('«' + habit.name + '» будет удалена. Это действие нельзя отменить.', function() {
+                    item.classList.add('removing');
+                    haptic(20);
+                    setTimeout(function() {
+                        appState.habits = appState.habits.filter(function(h) { return h.id !== habitId; });
+                        recordToday(); recalcUserStreak(); saveState();
+                        if (item.parentNode) item.parentNode.removeChild(item);
+                        renderToday(); renderDaysStrip();
+                        updateSummary(); updateEnergy();
+                        updateStreakHeader(false);
+                        showToast('«' + habit.name + '» удалена');
+                    }, 400);
+                });
+            });
+
+            var contentEl = item.querySelector('.habit-list-content');
+            if (contentEl) contentEl.addEventListener('click', function() {
+                item.classList.remove('swiped');
+            });
+        });
+    }
+
+    function updateSummary() {
+        var total = appState.habits.length;
+        var done = appState.habits.filter(function(h) { return h.current >= h.target; }).length;
+        var left = total - done;
+        var pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+        var hintEl = $('#dayHint'), pctEl = $('#dayPercent'), progressFill = $('#dayProgressFill');
+        if (hintEl) {
+            if (left === 0 && total > 0) hintEl.innerHTML = 'Всё готово!';
+            else hintEl.innerHTML = 'Осталось <strong>' + left + ' из ' + total + '</strong>';
+        }
+        if (pctEl) pctEl.textContent = pct + '%';
+        if (progressFill) progressFill.style.width = pct + '%';
+
+        var weekRange = $('#weekRange');
+        if (weekRange) weekRange.textContent = done + ' / ' + total;
+    }
+
+    function updateEnergy() {
+        var total = appState.habits.length;
+        var totalProgress = 0;
+        appState.habits.forEach(function(h) {
+            totalProgress += Math.min(1, h.current / h.target);
+        });
+        var pct = total === 0 ? 0 : Math.round((totalProgress / total) * 100);
+
+        var ring = $('#energyRing'), num = $('#energyNum'), wrap = $('#energyRingWrap');
+        if (ring) ring.style.strokeDashoffset = 176 - (176 * pct / 100);
+        if (num) {
+            num.textContent = pct + '%';
+            num.classList.remove('bump');
+            void num.offsetWidth;
+            num.classList.add('bump');
+        }
+        if (wrap) {
+            wrap.classList.remove('pulse');
+            void wrap.offsetWidth;
+            wrap.classList.add('pulse');
+        }
+
+        var maxStreak = 0;
+        appState.habits.forEach(function(h) {
+            if ((h.streak || 0) > maxStreak) maxStreak = h.streak;
+        });
+        if ((appState.userStreak || 0) > maxStreak) maxStreak = appState.userStreak;
+
+        var statMaxStreak = $('#statMaxStreak'), statTotal = $('#statTotal'),
+            statDone = $('#statDone'), statEnergy = $('#statEnergy');
+        if (statMaxStreak) { statMaxStreak.textContent = maxStreak; bumpOnce(statMaxStreak); }
+        if (statTotal) { statTotal.textContent = total; bumpOnce(statTotal); }
+        if (statDone) { statDone.textContent = appState.habits.filter(function(h) { return h.current >= h.target; }).length; bumpOnce(statDone); }
+        if (statEnergy) { statEnergy.textContent = pct + '%'; bumpOnce(statEnergy); }
+    }
+
+    function bumpOnce(el) {
+        el.classList.remove('bump');
+        void el.offsetWidth;
+        el.classList.add('bump');
+    }
+
+    function updateStreakHeader(bump) {
+        var days = appState.userStreak || 0;
+        var el = $('#streakHeader'), val = $('#streakValue');
+        if (val) {
+            val.textContent = days;
+            if (bump) {
+                val.classList.remove('bump');
+                void val.offsetWidth;
+                val.classList.add('bump');
+                setTimeout(function() { val.classList.remove('bump'); }, 700);
+            }
+        }
+        applyStreakStyle(el, days);
+    }
+
+    function renderDaysStrip() {
+        var container = $('#daysStripLine');
+        if (!container) return;
+        var today = new Date();
+        var todayIdx = today.getDay();
+        var order = [1, 2, 3, 4, 5, 6, 0];
+        var labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        function norm(d) { return d === 0 ? 7 : d; }
+        var todayNorm = norm(todayIdx);
+
+        var monday = new Date(today);
+        monday.setDate(today.getDate() - (todayNorm - 1));
+
+        var html = '';
+        order.forEach(function(dayIdx, i) {
+            var dayNorm = norm(dayIdx);
+            var isToday = dayIdx === todayIdx;
+            var isPast = dayNorm < todayNorm;
+            var cls = 'day-node';
+            var iconSvg;
+            if (isToday) {
+                cls += ' today';
+                iconSvg = '<circle cx="12" cy="12" r="4"/>';
+            } else if (isPast) {
+                var d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                var rec = appState.history[dateKey(d)];
+                var full = rec && rec.total > 0 && rec.done >= rec.total;
+                if (full) { cls += ' done'; iconSvg = '<polyline points="20 6 9 17 4 12"/>'; }
+                else { cls += ' missed'; iconSvg = '<path d="M18 6L6 18"/><path d="M6 6l12 12"/>'; }
+            } else {
+                cls += ' future';
+                iconSvg = '<circle cx="12" cy="12" r="3"/>';
+            }
+            html += '<div class="' + cls + '">' +
+                '<div class="day-dot"><svg viewBox="0 0 24 24">' + iconSvg + '</svg></div>' +
+                '<span class="day-label">' + labels[i] + '</span>' +
+            '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    function renderStats() {
+        var heatmap = $('#heatmap');
+        if (!heatmap) return;
+        var CELLS = 78;
+        var today = new Date();
+        var html = '';
+        for (var i = CELLS - 1; i >= 0; i--) {
+            var d = new Date(today);
+            d.setDate(today.getDate() - i);
+            var key = dateKey(d);
+            var rec = appState.history[key];
+            var cls = 'heat-cell';
+            var isFuture = d > today;
+            if (isFuture) cls += ' future';
+            else if (rec && rec.total > 0) {
+                var ratio = rec.done / rec.total;
+                if (ratio >= 1) cls += ' l4';
+                else if (ratio >= 0.75) cls += ' l3';
+                else if (ratio >= 0.5) cls += ' l2';
+                else if (ratio > 0) cls += ' l1';
+            }
+            html += '<div class="' + cls + '" style="animation-delay:' + ((CELLS - i) * 0.008) + 's"></div>';
+        }
+        heatmap.innerHTML = html;
+        updateEnergy();
+    }
+
+    function renderProfile() {
+        var name = appState.userName || 'Друг';
+        var nameEl = $('#profileName'), letterEl = $('#avatarLetter'),
+            settingsNameEl = $('#settingsName'), subEl = $('#profileSub');
+        if (nameEl) nameEl.textContent = name;
+        if (letterEl) letterEl.textContent = name[0].toUpperCase();
+        if (settingsNameEl) settingsNameEl.textContent = name;
+        if (subEl && appState.startedAt) {
+            var days = Math.floor((Date.now() - appState.startedAt) / 86400000);
+            if (days === 0) subEl.textContent = 'Со мной с сегодня';
+            else subEl.textContent = 'Со мной ' + days + ' ' + plural(days, ['день', 'дня', 'дней']);
+        }
+    }
+
+    var createModal = $('#createModal'), nameModal = $('#nameModal');
+
+    function getCurrentStep(unit) {
+        var selected = $('#stepChips .target-chip.selected');
+        if (selected) {
+            var val = parseFloat(selected.getAttribute('data-val'));
+            if (val) return val;
+        }
+        var customInput = $('#customStep');
+        if (customInput) {
+            var custom = parseFloat(customInput.value);
+            if (custom) return custom;
+        }
+        var defaults = { 'мл': 200, 'л': 0.5, 'мин': 10, 'раз': 1 };
+        return defaults[unit] || 1;
+    }
+
+    function updateStepInfo() {
+        var targetInput = $('#newHabitTarget');
+        var target = targetInput ? parseFloat(targetInput.value) : 1;
+        if (!target) target = 1;
+        var unitBtn = $('.unit-opt.active');
+        var unit = unitBtn ? unitBtn.getAttribute('data-unit') : 'мл';
+        var step = getCurrentStep(unit);
+        var taps = Math.ceil(target / step);
+        var info = $('#stepInfo');
+        if (info) {
+            info.innerHTML = 'Понадобится <strong>' + taps + '</strong> ' + plural(taps, ['тап', 'тапа', 'тапов']) + ' чтобы выполнить всю норму';
+        }
+    }
+
+    function renderStepChips(unit) {
+        var chips = $('#stepChips');
+        if (!chips) return;
+        var presets = (appState.customSteps[unit] || [1]).slice();
+        var defaultVal = presets[Math.floor(presets.length / 2)] || presets[0];
+        var html = '';
+        presets.forEach(function(v) {
+            var sel = v === defaultVal ? ' selected' : '';
+            html += '<button class="target-chip' + sel + '" data-val="' + v + '" type="button">' + v + '</button>';
+        });
+        chips.innerHTML = html;
+    }
+
+    function renderTargetChips(unit) {
+        var chips = $('#targetChips');
+        if (!chips) return;
+        var presets;
+        if (unit === 'мл') presets = [1000, 1500, 2000, 2500, 3000];
+        else if (unit === 'л') presets = [1, 1.5, 2, 3];
+        else if (unit === 'мин') presets = [10, 20, 30, 45, 60];
+        else presets = [1, 3, 5, 10];
+        var defaultVal = presets[Math.floor(presets.length / 2)];
+        var html = '';
+        presets.forEach(function(v) {
+            var sel = v === defaultVal ? ' selected' : '';
+            html += '<button class="target-chip' + sel + '" data-val="' + v + '" type="button">' + v + '</button>';
+        });
+        chips.innerHTML = html;
+        var input = $('#newHabitTarget');
+        if (input) input.value = defaultVal;
+    }
+
+    function openCreateModal() {
+        var nameInput = $('#newHabitName');
+        if (nameInput) nameInput.value = '';
+        var customStep = $('#customStep');
+        if (customStep) customStep.value = '';
+        $$('.icon-opt').forEach(function(b, i) { b.classList.toggle('selected', i === 0); });
+        $$('.color-opt').forEach(function(b, i) { b.classList.toggle('selected', i === 1); });
+        $$('.unit-opt').forEach(function(b, i) { b.classList.toggle('active', i === 0); });
+        renderTargetChips('мл'); renderStepChips('мл'); updateStepInfo();
+        if (createModal) createModal.classList.add('open');
+        haptic(15);
+    }
+    function closeCreateModal() {
+        if (!createModal) return;
+        createModal.classList.add('closing');
+        setTimeout(function() {
+            createModal.classList.remove('open', 'closing');
+        }, 320);
+    }
+    var openCreateHabitBtn = $('#openCreateHabit');
+    if (openCreateHabitBtn) openCreateHabitBtn.addEventListener('click', openCreateModal);
+    var cancelCreateBtn = $('#cancelCreate');
+    if (cancelCreateBtn) cancelCreateBtn.addEventListener('click', closeCreateModal);
+    if (createModal) createModal.addEventListener('click', function(e) {
+        if (e.target === createModal) closeCreateModal();
+    });
+
+    var iconGrid = $('#iconGrid');
+    if (iconGrid) iconGrid.addEventListener('click', function(e) {
+        var btn = e.target.closest('.icon-opt');
+        if (!btn) return;
+        $$('.icon-opt').forEach(function(b) { b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        haptic(8);
+    });
+    var colorGrid = $('#colorGrid');
+    if (colorGrid) colorGrid.addEventListener('click', function(e) {
+        var btn = e.target.closest('.color-opt');
+        if (!btn) return;
+        $$('.color-opt').forEach(function(b) { b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        haptic(8);
+    });
+    var unitSelector = $('#unitSelector');
+    if (unitSelector) unitSelector.addEventListener('click', function(e) {
+        var btn = e.target.closest('.unit-opt');
+        if (!btn) return;
+        $$('.unit-opt').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        haptic(8);
+        var unit = btn.getAttribute('data-unit');
+        var customStep = $('#customStep');
+        if (customStep) customStep.value = '';
+        renderTargetChips(unit); renderStepChips(unit); updateStepInfo();
+    });
+    var targetChips = $('#targetChips');
+    if (targetChips) targetChips.addEventListener('click', function(e) {
+        var btn = e.target.closest('.target-chip');
+        if (!btn) return;
+        $$('#targetChips .target-chip').forEach(function(b) { b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        var input = $('#newHabitTarget');
+        if (input) input.value = btn.getAttribute('data-val');
+        updateStepInfo();
+        haptic(8);
+    });
+    var stepChips = $('#stepChips');
+    if (stepChips) stepChips.addEventListener('click', function(e) {
+        var btn = e.target.closest('.target-chip');
+        if (!btn) return;
+        $$('#stepChips .target-chip').forEach(function(b) { b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        var customStep = $('#customStep');
+        if (customStep) customStep.value = '';
+        updateStepInfo();
+        haptic(8);
+    });
+    var customStepBtn = $('#customStepBtn');
+    if (customStepBtn) customStepBtn.addEventListener('click', function() {
+        var customInput = $('#customStep');
+        var val = customInput ? parseFloat(customInput.value) : 0;
+        var unitBtn = $('.unit-opt.active');
+        var unit = unitBtn ? unitBtn.getAttribute('data-unit') : 'мл';
+        if (!val || val <= 0) { showToast('Введи своё число'); haptic(20); return; }
+        var targetInput = $('#newHabitTarget');
+        var target = targetInput ? parseFloat(targetInput.value) : 0;
+        if (target && val > target) { showToast('Шаг не может быть больше цели'); haptic(20); return; }
+        $$('#stepChips .target-chip').forEach(function(b) { b.classList.remove('selected'); });
+        if (!appState.customSteps[unit]) appState.customSteps[unit] = [];
+        if (appState.customSteps[unit].indexOf(val) === -1) {
+            appState.customSteps[unit].push(val);
+            appState.customSteps[unit].sort(function(a,b) { return a - b; });
+            saveState();
+        }
+        renderStepChips(unit);
+        var chip = document.querySelector('#stepChips .target-chip[data-val="' + val + '"]');
+        if (chip) {
+            $$('#stepChips .target-chip').forEach(function(b) { b.classList.remove('selected'); });
+            chip.classList.add('selected');
+        }
+        updateStepInfo();
+        haptic(12);
+        showToast('+' + val + ' ' + unit + ' добавлено');
+    });
+    var customStepEl = $('#customStep');
+    if (customStepEl) customStepEl.addEventListener('input', function() {
+        $$('#stepChips .target-chip').forEach(function(b) { b.classList.remove('selected'); });
+        updateStepInfo();
+    });
+    var targetInputEl = $('#newHabitTarget');
+    if (targetInputEl) targetInputEl.addEventListener('input', function() {
+        $$('#targetChips .target-chip').forEach(function(b) { b.classList.remove('selected'); });
+        updateStepInfo();
+    });
+
+    var submitCreateBtn = $('#submitCreate');
+    if (submitCreateBtn) submitCreateBtn.addEventListener('click', function() {
+        var nameInput = $('#newHabitName');
+        var name = nameInput ? nameInput.value.trim() : '';
+        if (!name) {
+            if (nameInput) {
+                nameInput.classList.add('shake');
+                setTimeout(function() { nameInput.classList.remove('shake'); }, 500);
+                nameInput.focus();
+            }
+            showToast('Введи название');
+            haptic(20);
+            return;
+        }
+        var iconBtn = $('.icon-opt.selected'), colorBtn = $('.color-opt.selected'), unitBtn = $('.unit-opt.active');
+        var icon = iconBtn ? iconBtn.getAttribute('data-icon') : 'droplet';
+        var color = colorBtn ? colorBtn.getAttribute('data-color') : '#33D6FF';
+        var unit = unitBtn ? unitBtn.getAttribute('data-unit') : 'раз';
+        var targetInput = $('#newHabitTarget');
+        var target = targetInput ? parseFloat(targetInput.value) : 1;
+        if (!target || target <= 0) target = 1;
+        var step = getCurrentStep(unit);
+        if (step > target) { showToast('Шаг не может быть больше цели'); haptic(20); return; }
+
+        appState.habits.push({
+            id: 'h_' + Date.now(),
+            name: name, icon: icon, color: color,
+            target: target, unit: unit, step: step,
+            current: 0, streak: 0,
+            lastCheckDate: null, lastStreakDate: null
+        });
+        saveState();
+        closeCreateModal();
+        haptic(20);
+        showToast('«' + name + '» создана');
+        renderToday(); renderHabitsList(); renderDaysStrip();
+        updateSummary(); updateEnergy();
+    });
+
+    var editNameItem = $('#editNameItem');
+    if (editNameItem) editNameItem.addEventListener('click', function() {
+        var input = $('#nameInput');
+        if (input) input.value = appState.userName || '';
+        if (nameModal) nameModal.classList.add('open');
+        haptic(15);
+    });
+    var cancelNameBtn = $('#cancelName');
+    if (cancelNameBtn) cancelNameBtn.addEventListener('click', function() {
+        if (!nameModal) return;
+        nameModal.classList.add('closing');
+        setTimeout(function() { nameModal.classList.remove('open', 'closing'); }, 300);
+    });
+    if (nameModal) nameModal.addEventListener('click', function(e) {
+        if (e.target === nameModal) {
+            nameModal.classList.add('closing');
+            setTimeout(function() { nameModal.classList.remove('open', 'closing'); }, 300);
+        }
+    });
+    var submitNameBtn = $('#submitName');
+    if (submitNameBtn) submitNameBtn.addEventListener('click', function() {
+        var input = $('#nameInput');
+        var val = input ? input.value.trim() : '';
+        if (!val) { showToast('Введи имя'); return; }
+        appState.userName = val;
+        saveState(); renderProfile(); updateClock();
+        if (nameModal) {
+            nameModal.classList.add('closing');
+            setTimeout(function() { nameModal.classList.remove('open', 'closing'); }, 300);
+        }
+        showToast('Имя обновлено');
+    });
+
+    var resetItem = $('#resetItem');
+    if (resetItem) resetItem.addEventListener('click', function() {
+        openConfirm('Все привычки и настройки будут сброшены. Онбординг пройдёшь заново.', function() {
+            appState = getEmptyState();
+            saveState();
+            renderAll();
+            showOnboard();
+            showToast('Данные сброшены');
+        });
+    });
+
+    function renderAll() {
+        renderToday();
+        renderHabitsList();
+        renderProfile();
+        renderDaysStrip();
+        updateSummary();
+        updateEnergy();
+        updateStreakHeader(false);
+        renderStats();
+        updateClock();
+    }
+
+    // ============================================================
+    //  TELEGRAM BUTTONS
+    // ============================================================
+    var tgCloseBtn = $('#tgCloseBtn');
+    if (tgCloseBtn) tgCloseBtn.addEventListener('click', function() {
+        haptic(15);
+        try { if (tg) tg.close(); }
+        catch (e) { if (window.history.length > 1) window.history.back(); }
+    });
+    var tgMenuBtn = $('#tgMenuBtn');
+    if (tgMenuBtn) tgMenuBtn.addEventListener('click', function() {
+        haptic(10);
+        navBtns.forEach(function(b) {
+            b.classList.toggle('active', b.dataset.screen === 'screenProfile');
+        });
+        screens.forEach(function(s) {
+            s.classList.toggle('active', s.id === 'screenProfile');
+        });
+        currentScreen = 'screenProfile';
+        var target = document.getElementById('screenProfile');
+        if (target) target.scrollTop = 0;
+    });
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+    setTimeout(function() {
+        var splash = $('#splash');
+        if (splash) splash.classList.add('hide');
+    }, 1200);
+
+    checkDayChange();
+    recalcHabitStreaks();
+    recalcUserStreak();
+    saveState();
+    renderAll();
+
+    setInterval(function() {
+        updateClock();
+        if (checkDayChange()) renderAll();
+    }, 60000);
+
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            if (checkDayChange()) renderAll();
+            else updateClock();
+        }
+    });
+
+    document.addEventListener('contextmenu', function(e) {
+        if (e.target.closest('.phone')) e.preventDefault();
+    });
+
+})();
+</script>
+</body>
+          </html> ц
